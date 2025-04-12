@@ -24,7 +24,7 @@ export default function Home() {
         const [spotRes, futureRes, fundingRes] = await Promise.all([
           fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`),
           fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`),
-          fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`)
+          fetch(`/api/getFundingRate?symbol=${symbol}`) // 调用你创建的 API 路由
         ]);
 
         const spot = await spotRes.json();
@@ -33,8 +33,8 @@ export default function Home() {
 
         const spotPrice = parseFloat(spot.price);
         const futurePrice = parseFloat(future.price);
-        const predictedFundingRate = parseFloat(funding[0]?.lastFundingRate || 0) * 100; // 预期资金费率
-        const previousFundingRate = parseFloat(funding[0]?.interestRate || 0) * 100; // 前一次资金费率
+        const predictedFundingRate = parseFloat(funding.lastFundingRate || 0) * 100; // 预期资金费率
+        const previousFundingRate = parseFloat(funding.interestRate || 0) * 100; // 前一次资金费率
         const basisRate = ((spotPrice - futurePrice) / futurePrice) * 100; // 基差公式调整: (现货 - 合约) / 合约
         const score = basisRate - predictedFundingRate;
 
