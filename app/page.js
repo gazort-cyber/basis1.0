@@ -6,6 +6,7 @@ export default function Home() {
   const [symbols, setSymbols] = useState([]);
   const [search, setSearch] = useState('');
 
+  // 获取币种列表
   useEffect(() => {
     async function fetchSymbols() {
       const res = await fetch('https://fapi.binance.com/fapi/v1/ticker/price');
@@ -16,6 +17,7 @@ export default function Home() {
     fetchSymbols();
   }, []);
 
+  // 获取现货、合约价格和资金费率
   const fetchData = async () => {
     if (symbols.length === 0) return;
 
@@ -34,9 +36,11 @@ export default function Home() {
 
           const spotPrice = parseFloat(spot.price);
           const futurePrice = parseFloat(future.price);
-          const basisRate = ((futurePrice - spotPrice) / spotPrice) * 100;
+          const basisRate = ((spotPrice - futurePrice) / futurePrice) * 100; // 更正后的基差公式
+          
           const lastFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
-          const predictedFundingRate = parseFloat(premium.predictedFundingRate || 0) * 100;
+          const predictedFundingRate = parseFloat(premium.predictedFundingRate || 0) * 100; // 默认值处理
+
           const score = basisRate - predictedFundingRate;
 
           return {
@@ -60,10 +64,11 @@ export default function Home() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 60000);
+    const interval = setInterval(fetchData, 60000); // 每60秒自动刷新
     return () => clearInterval(interval);
   }, [symbols]);
 
+  // 处理搜索功能
   const displayedData = data.filter(item =>
     item.symbol.toLowerCase().includes(search.toLowerCase())
   );
@@ -139,4 +144,3 @@ export default function Home() {
     </main>
   );
 }
-
