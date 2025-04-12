@@ -65,4 +65,56 @@ export default function Home() {
   return (
     <main style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
       <h1 style={{ marginBottom: 10 }}>币安基差套利工具</h1>
-      <button
+      <button onClick={fetchData} style={{ marginBottom: 15, padding: '6px 12px', cursor: 'pointer' }}>
+        手动刷新
+      </button>
+      <input 
+        type="text" 
+        placeholder="搜索币种" 
+        value={search} 
+        onChange={e => setSearch(e.target.value)}
+        style={{
+          padding: '6px 10px',
+          marginRight: 10,
+          marginBottom: 15,
+          border: '1px solid #ddd',
+          borderRadius: 4
+        }}
+      />
+      <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
+        <thead style={{ backgroundColor: '#f2f2f2' }}>
+          <tr>
+            <th>币种</th>
+            <th>现货价</th>
+            <th>合约价</th>
+            <th>基差率%</th>
+            <th>预期资金费率%</th>
+            <th>前一次资金费率%</th>
+            <th>套利得分</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data
+            .filter(row => row.symbol.toLowerCase().includes(search.toLowerCase()))
+            .map(row => (
+              <tr key={row.symbol} style={{
+                backgroundColor: parseFloat(row.score) > 1 ? '#fff4d6' : 'white',
+                cursor: 'pointer'
+              }}>
+                <td>{row.symbol}</td>
+                <td>{row.spotPrice}</td>
+                <td>{row.futurePrice}</td>
+                <td>{row.basisRate}</td>
+                <td>{row.predictedFundingRate}</td>
+                <td>{row.previousFundingRate}</td>
+                <td>{row.score}</td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+      <p style={{ fontSize: 12, marginTop: 10 }}>
+        每60秒自动刷新，按“基差率 - 预期资金费率”排序，高亮显示套利得分大于1的币种
+      </p>
+    </main>
+  );
+}
