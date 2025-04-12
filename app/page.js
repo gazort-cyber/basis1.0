@@ -80,4 +80,63 @@ export default function Home() {
           onChange={e => setSearch(e.target.value)}
           style={{
             padding: '6px 10px',
-            marginRight: 10
+            marginRight: 10,
+            fontSize: 14,
+            width: 200
+          }}
+        />
+        <button
+          onClick={fetchData}
+          style={{
+            padding: '6px 12px',
+            cursor: 'pointer',
+            backgroundColor: '#0070f3',
+            color: 'white',
+            border: 'none',
+            borderRadius: 4
+          }}
+        >
+          手动刷新
+        </button>
+      </div>
+
+      <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
+        <thead style={{ backgroundColor: '#f2f2f2' }}>
+          <tr>
+            <th>币种</th>
+            <th>现货价</th>
+            <th>合约价</th>
+            <th>基差率%</th>
+            <th>上次资金费率%</th>
+            <th>预期资金费率%</th>
+            <th>套利得分</th>
+          </tr>
+        </thead>
+        <tbody>
+          {displayedData.map(row => (
+            <tr
+              key={row.symbol}
+              style={{
+                backgroundColor: parseFloat(row.score) > 1 ? '#fff4d6' : 'white',
+                cursor: 'pointer'
+              }}
+            >
+              <td>{row.symbol}</td>
+              <td>{row.spotPrice}</td>
+              <td>{row.futurePrice}</td>
+              <td>{row.basisRate}</td>
+              <td>{row.lastFundingRate}</td>
+              <td>{row.predictedFundingRate}</td>
+              <td>{row.score}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <p style={{ fontSize: 12, marginTop: 10 }}>
+        每60秒自动刷新，按“基差率 - 预期资金费率”排序，高亮显示套利得分大于1的币种
+      </p>
+    </main>
+  );
+}
+
