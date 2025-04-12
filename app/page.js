@@ -22,7 +22,7 @@ export default function Home() {
     if (symbols.length === 0) return;
 
     const newData = await Promise.all(
-      symbols.slice(0, 100).map(async (symbol) => {
+      symbols.map(async (symbol) => {
         try {
           const [spotRes, futureRes, premiumRes] = await Promise.all([
             fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`),
