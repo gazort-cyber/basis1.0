@@ -1,10 +1,41 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 export default function Home() {
   const [data, setData] = useState([]);
   const [symbols, setSymbols] = useState([]);
   const [search, setSearch] = useState('');
+  const [lastUpdate, setLastUpdate] = useState<Date>();
+
+  // 统计区间数据
+  const scoreRanges = useMemo(() => {
+    const ranges: string[] = [];
+    for (let i = -10; i <= 10; i += 0.5) {
+      ranges.push(`${i >= 0 ? '+' : ''}${i.toFixed(1)}~${(i + 0.5).toFixed(1)}`);
+    }
+    return ranges;
+  }, []);
+
+  // 统计各区间数量
+  const rangeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    scoreRanges.forEach(range => counts[range] = 0);
+    
+    data.forEach(item => {
+      const score = parseFloat(item.score);
+      for (const range of scoreRanges) {
+        const [min, max] = range.split('~').map(s => parseFloat(s));
+        if (score >= min && score < max) {
+          counts[range]++;
+          break;
+        }
+      }
+    });
+    
+    return scoreRanges
+      .filter(range => counts[range] > 0)
+      .map(range => ({ range, count: counts[range] }));
+  }, [data, scoreRanges]);
 
   // 获取交易对符号
   useEffect(() => {
@@ -17,11 +48,10 @@ export default function Home() {
     fetchSymbols();
   }, []);
 
-  // 获取合约数据，并过滤3天前的下架合约
+  // 获取合约数据
   const fetchData = async () => {
     if (symbols.length === 0) return;
 
-    // 获取当前时间戳，并计算3天之前的时间戳（毫秒）
     const currentTime = Date.now();
     const threeDaysAgo = currentTime - 3 * 24 * 60 * 60 * 1000;
 
@@ -40,15 +70,12 @@ export default function Home() {
 
           const spotPrice = parseFloat(spot.price);
           const futurePrice = parseFloat(future.price);
-          const basisRate = ((spotPrice- futurePrice) / futurePrice) * 100;
+          const basisRate = ((spotPrice - futurePrice) / futurePrice) * 100;
           const lastFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
           const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
           const score = basisRate - predictedFundingRate;
 
-          // 检查合约是否下架，time 小于3天之前的时间戳
-          if (premium.time && Number(premium.time) < threeDaysAgo) {
-            return null; // 如果合约时间小于3天之前，则视为已下架，返回 null
-          }
+          if (premium.time && Number(premium.time) < threeDaysAgo) return null;
 
           return {
             symbol,
@@ -59,34 +86,66 @@ export default function Home() {
             predictedFundingRate: predictedFundingRate.toFixed(4),
             score: score.toFixed(2),
           };
-        } catch (e) {
-          return null; // 出现错误时返回 null
+        } catch {
+          return null;
         }
       })
     );
 
-    // 过滤掉 null 值的项并按套利得分排序
-    const filteredData = newData.filter(Boolean).sort((a, b) => b.score - a.score);
-    setData(filteredData);
+    const filteredData = newData
+      .filter(Boolean)
+      .sort((a, b) => {
+        const scoreA = parseFloat(a.score);
+        const scoreB = parseFloat(b.score);
+        return (scoreB > 10 || scoreB < -10) ? 1 : (scoreA - scoreB);
+      });
+
+    setData([...filteredData.filter(d => Math.abs(parseFloat(d.score)) <= 10),
+      ...filteredData.filter(d => Math.abs(parseFloat(d.score)) > 10)])
+    setLastUpdate(new Date());
   };
 
-  // 自动每60秒刷新数据
+  // 自动刷新
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, [symbols]);
 
-  // 筛选显示的数据（根据搜索框输入）
+  // 搜索过滤
   const displayedData = data.filter(item =>
     item.symbol.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <main style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ marginBottom: 10 }}>币安基差套利工具</h1>
+      {/* 导航栏 */}
+      <nav style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+        borderBottom: '1px solid #eee'
+      }}>
+        <div>
+          <h2 style={{ margin: 0 }}>基差套利工具</h2>
+          <div style={{ color: '#666' }}>
+            {rangeCounts.map(({ range, count }) => (
+              <div key={range} style={{ margin: '2px 0' }}>
+                {range}: {count}个
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', gap: 10 }}>
+          <span>交易对: {displayedData.length}/{data.length}</span>
+          <span>{lastUpdate ? lastUpdate.toLocaleString() : '未更新'}</span>
+        </div>
+      </nav>
 
-      <div style={{ marginBottom: 15 }}>
+      {/* 搜索和按钮 */}
+      <div style={{ marginBottom: 15, display: 'flex', gap: 10 }}>
         <input
           type="text"
           placeholder="搜索币种..."
@@ -114,8 +173,9 @@ export default function Home() {
         </button>
       </div>
 
-      <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
-        <thead style={{ backgroundColor: '#f2f2f2' }}>
+      {/* 数据表格 */}
+      <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+        <thead>
           <tr>
             <th>币种</th>
             <th>现货价</th>
@@ -131,7 +191,11 @@ export default function Home() {
             <tr
               key={row.symbol}
               style={{
-                backgroundColor: parseFloat(row.score) > 1 ? '#fff4d6' : 'white',
+                backgroundColor: Math.abs(parseFloat(row.score)) > 10 
+                  ? '#ffe6e6' 
+                  : parseFloat(row.score) > 1 
+                  ? '#fff4d6' 
+                  : 'white',
                 cursor: 'pointer'
               }}
             >
@@ -148,7 +212,7 @@ export default function Home() {
       </table>
 
       <p style={{ fontSize: 12, marginTop: 10 }}>
-        每60秒自动刷新，按“基差率 - 预期资金费率”排序，高亮显示套利得分大于1的币种
+        每60秒自动刷新 | 异常值(基差率绝对值>10)已标红置底
       </p>
     </main>
   );
