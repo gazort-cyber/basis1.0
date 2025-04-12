@@ -65,14 +65,16 @@ export default function Home() {
       })
     );
 
-    const filteredData = newData.filter(Boolean).sort((a, b) => {
-      // 基差得分绝对值大于10的标红并放到最后面
-      if (Math.abs(b.score) > 10) return 1;
-      if (Math.abs(a.score) > 10) return -1;
-      return b.score - a.score;
-    });
+    const filteredData = newData.filter(Boolean);
 
-    setData(filteredData);
+    // 将得分绝对值大于10的项提取出来放到最后面
+    const normalData = filteredData.filter(item => Math.abs(parseFloat(item.score)) <= 10);
+    const abnormalData = filteredData.filter(item => Math.abs(parseFloat(item.score)) > 10);
+
+    // 将正常数据和异常数据合并，异常数据放到最后
+    const combinedData = [...normalData, ...abnormalData];
+
+    setData(combinedData);
     setLastUpdated(new Date().toLocaleTimeString());
   };
 
