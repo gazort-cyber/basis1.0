@@ -17,13 +17,13 @@ export default function Home() {
     fetchSymbols();
   }, []);
 
-  // 获取合约数据，并过滤30天前的下架合约
+  // 获取合约数据，并过滤3天前的下架合约
   const fetchData = async () => {
     if (symbols.length === 0) return;
 
-    // 获取当前时间戳，并计算30天之前的时间戳（毫秒）
+    // 获取当前时间戳，并计算3天之前的时间戳（毫秒）
     const currentTime = Date.now();
-    const thirtyDaysAgo = currentTime - 3 * 24 * 60 * 60 * 1000;
+    const threeDaysAgo = currentTime - 3 * 24 * 60 * 60 * 1000;
 
     const newData = await Promise.all(
       symbols.map(async (symbol) => {
@@ -40,14 +40,14 @@ export default function Home() {
 
           const spotPrice = parseFloat(spot.price);
           const futurePrice = parseFloat(future.price);
-          const basisRate = ((futurePrice - spotPrice) / spotPrice) * 100;
+          const basisRate = ((spotPrice- futurePrice) / futurePrice) * 100;
           const lastFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
           const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
           const score = basisRate - predictedFundingRate;
 
-          // 检查合约是否下架，time 小于30天之前的时间戳
-          if (premium.time && premium.time < thirtyDaysAgo) {
-            return null; // 如果合约时间小于30天之前，则视为已下架，返回 null
+          // 检查合约是否下架，time 小于3天之前的时间戳
+          if (premium.time && Number(premium.time) < threeDaysAgo) {
+            return null; // 如果合约时间小于3天之前，则视为已下架，返回 null
           }
 
           return {
