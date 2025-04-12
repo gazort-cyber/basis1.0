@@ -6,20 +6,24 @@ export default function Home() {
   const [symbols, setSymbols] = useState([]);
   const [search, setSearch] = useState('');
 
-  // 获取币安的所有合约
+  // 获取交易对符号
   useEffect(() => {
     async function fetchSymbols() {
       const res = await fetch('https://fapi.binance.com/fapi/v1/ticker/price');
       const all = await res.json();
-      const filtered = all.filter(s => s.symbol.endsWith('USDT')); // 只筛选USDT交易对
+      const filtered = all.filter(s => s.symbol.endsWith('USDT'));
       setSymbols(filtered.map(s => s.symbol));
     }
     fetchSymbols();
   }, []);
 
-  // 获取每个合约的详细数据
+  // 获取合约数据，并过滤30天前的下架合约
   const fetchData = async () => {
     if (symbols.length === 0) return;
+
+    // 获取当前时间戳，并计算30天之前的时间戳（毫秒）
+    const currentTime = Date.now();
+    const thirtyDaysAgo = currentTime - 30 * 24 * 60 * 60 * 1000;
 
     const newData = await Promise.all(
       symbols.map(async (symbol) => {
@@ -34,16 +38,17 @@ export default function Home() {
           const future = await futureRes.json();
           const premium = await premiumRes.json();
 
-          // 计算现货价格、期货价格和基差率
           const spotPrice = parseFloat(spot.price);
           const futurePrice = parseFloat(future.price);
           const basisRate = ((futurePrice - spotPrice) / spotPrice) * 100;
           const lastFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
-          const predictedFundingRate = parseFloat(premium.predictedFundingRate || 0) * 100;
+          const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
           const score = basisRate - predictedFundingRate;
 
-          // 判断是否下架
-          const isDelisted = new Date(premium.updateTime).getTime() < Date.now() - 24 * 60 * 60 * 1000; // 24小时未更新
+          // 检查合约是否下架，time 小于30天之前的时间戳
+          if (premium.time && premium.time < thirtyDaysAgo) {
+            return null; // 如果合约时间小于30天之前，则视为已下架，返回 null
+          }
 
           return {
             symbol,
@@ -53,33 +58,26 @@ export default function Home() {
             lastFundingRate: lastFundingRate.toFixed(4),
             predictedFundingRate: predictedFundingRate.toFixed(4),
             score: score.toFixed(2),
-            isDelisted,
           };
         } catch (e) {
-          return null;
+          return null; // 出现错误时返回 null
         }
       })
     );
 
-    const filteredData = newData.filter(Boolean);
-
-    // 将无现货价格的合约排到最后
-    const sortedData = filteredData.sort((a, b) => {
-      if (!a.spotPrice) return 1;  // 没有现货价格的合约排到最后
-      if (!b.spotPrice) return -1;
-      return b.score - a.score; // 根据套利得分排序
-    });
-
-    setData(sortedData);
+    // 过滤掉 null 值的项并按套利得分排序
+    const filteredData = newData.filter(Boolean).sort((a, b) => b.score - a.score);
+    setData(filteredData);
   };
 
+  // 自动每60秒刷新数据
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, [symbols]);
 
-  // 搜索过滤
+  // 筛选显示的数据（根据搜索框输入）
   const displayedData = data.filter(item =>
     item.symbol.toLowerCase().includes(search.toLowerCase())
   );
@@ -133,7 +131,7 @@ export default function Home() {
             <tr
               key={row.symbol}
               style={{
-                backgroundColor: row.isDelisted ? 'red' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'),
+                backgroundColor: parseFloat(row.score) > 1 ? '#fff4d6' : 'white',
                 cursor: 'pointer'
               }}
             >
@@ -150,7 +148,7 @@ export default function Home() {
       </table>
 
       <p style={{ fontSize: 12, marginTop: 10 }}>
-        每60秒自动刷新，按“基差率 - 预期资金费率”排序，高亮显示套利得分大于1的币种，已下架合约标红
+        每60秒自动刷新，按“基差率 - 预期资金费率”排序，高亮显示套利得分大于1的币种
       </p>
     </main>
   );
