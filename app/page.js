@@ -6,7 +6,6 @@ export default function Home() {
   const [symbols, setSymbols] = useState([]);
   const [search, setSearch] = useState('');
 
-  // 获取所有 USDT 永续合约币种
   useEffect(() => {
     async function fetchSymbols() {
       const res = await fetch('https://fapi.binance.com/fapi/v1/ticker/price');
@@ -17,7 +16,6 @@ export default function Home() {
     fetchSymbols();
   }, []);
 
-  // 主函数：抓数据 + 排序 + 计算
   const fetchData = async () => {
     if (symbols.length === 0) return;
 
@@ -60,14 +58,12 @@ export default function Home() {
     setData(filteredData);
   };
 
-  // 自动刷新
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 60000); // 每60秒刷新
+    const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, [symbols]);
 
-  // 过滤搜索
   const displayedData = data.filter(item =>
     item.symbol.toLowerCase().includes(search.toLowerCase())
   );
@@ -84,24 +80,4 @@ export default function Home() {
           onChange={e => setSearch(e.target.value)}
           style={{
             padding: '6px 10px',
-            marginRight: 10,
-            fontSize: 14,
-            width: 200
-          }}
-        />
-        <button
-          onClick={fetchData}
-          style={{
-            padding: '6px 12px',
-            cursor: 'pointer',
-            backgroundColor: '#0070f3',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4
-          }}
-        >
-          手动刷新
-        </button>
-      </div>
-
-      <table border="1" cellPadding="8" style={{ border
+            marginRight: 10
