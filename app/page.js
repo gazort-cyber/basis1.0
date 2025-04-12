@@ -2,13 +2,13 @@
 import { useEffect, useState, useMemo } from 'react';
 
 export default function Home() {
-  const [data, setData] = useState([]);
-  const [symbols, setSymbols] = useState([]);
-  const [search, setSearch] = useState('');
-  const [lastUpdate, setLastUpdate] = useState<Date>();
+  const [data, setData] = useState<any[]>([]);
+  const [symbols, setSymbols] = useState<string[]>([]);
+  const [search, setSearch] = useState<string>('');
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   // 统计区间数据
-  const scoreRanges = useMemo(() => {
+  const scoreRanges = useMemo<string[]>(() => {
     const ranges: string[] = [];
     for (let i = -10; i <= 10; i += 0.5) {
       ranges.push(`${i >= 0 ? '+' : ''}${i.toFixed(1)}~${(i + 0.5).toFixed(1)}`);
@@ -17,8 +17,8 @@ export default function Home() {
   }, []);
 
   // 统计各区间数量
-  const rangeCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
+  const rangeCounts = useMemo<{ [key: string]: number }>(() => {
+    const counts: { [key: string]: number } = {};
     scoreRanges.forEach(range => counts[range] = 0);
     
     data.forEach(item => {
@@ -34,17 +34,24 @@ export default function Home() {
     
     return scoreRanges
       .filter(range => counts[range] > 0)
-      .map(range => ({ range, count: counts[range] }));
+      .reduce((acc, range) => ({
+        ...acc,
+        [range]: counts[range]
+      }), {} as { [key: string]: number });
   }, [data, scoreRanges]);
 
   // 获取交易对符号
   useEffect(() => {
-    async function fetchSymbols() {
-      const res = await fetch('https://fapi.binance.com/fapi/v1/ticker/price');
-      const all = await res.json();
-      const filtered = all.filter(s => s.symbol.endsWith('USDT'));
-      setSymbols(filtered.map(s => s.symbol));
-    }
+    const fetchSymbols = async () => {
+      try {
+        const res = await fetch('https://fapi.binance.com/fapi/v1/ticker/price');
+        const all = await res.json();
+        const filtered = all.filter((s: any) => s.symbol.endsWith('USDT'));
+        setSymbols(filtered.map((s: any) => s.symbol));
+      } catch (error) {
+        console.error('获取交易对失败:', error);
+      }
+    };
     fetchSymbols();
   }, []);
 
@@ -55,54 +62,61 @@ export default function Home() {
     const currentTime = Date.now();
     const threeDaysAgo = currentTime - 3 * 24 * 60 * 60 * 1000;
 
-    const newData = await Promise.all(
-      symbols.map(async (symbol) => {
-        try {
-          const [spotRes, futureRes, premiumRes] = await Promise.all([
-            fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`),
-            fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`),
-            fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`)
-          ]);
+    try {
+      const newData = await Promise.all(
+        symbols.map(async (symbol) => {
+          try {
+            const [spotRes, futureRes, premiumRes] = await Promise.all([
+              fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`),
+              fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`),
+              fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`)
+            ]);
 
-          const spot = await spotRes.json();
-          const future = await futureRes.json();
-          const premium = await premiumRes.json();
+            const [spot, future, premium] = await Promise.all([
+              spotRes.json(),
+              futureRes.json(),
+              premiumRes.json()
+            ]);
 
-          const spotPrice = parseFloat(spot.price);
-          const futurePrice = parseFloat(future.price);
-          const basisRate = ((spotPrice - futurePrice) / futurePrice) * 100;
-          const lastFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
-          const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
-          const score = basisRate - predictedFundingRate;
+            const spotPrice = parseFloat(spot.price);
+            const futurePrice = parseFloat(future.price);
+            const basisRate = ((spotPrice - futurePrice) / futurePrice) * 100;
+            const lastFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
+            const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
+            const score = basisRate - predictedFundingRate;
 
-          if (premium.time && Number(premium.time) < threeDaysAgo) return null;
+            if (premium.time && Number(premium.time) < threeDaysAgo) return null;
 
-          return {
-            symbol,
-            spotPrice,
-            futurePrice,
-            basisRate: basisRate.toFixed(2),
-            lastFundingRate: lastFundingRate.toFixed(4),
-            predictedFundingRate: predictedFundingRate.toFixed(4),
-            score: score.toFixed(2),
-          };
-        } catch {
-          return null;
-        }
-      })
-    );
+            return {
+              symbol,
+              spotPrice,
+              futurePrice,
+              basisRate: basisRate.toFixed(2),
+              lastFundingRate: lastFundingRate.toFixed(4),
+              predictedFundingRate: predictedFundingRate.toFixed(4),
+              score: score.toFixed(2),
+            };
+          } catch (error) {
+            console.error(`获取 ${symbol} 数据失败:`, error);
+            return null;
+          }
+        })
+      );
 
-    const filteredData = newData
-      .filter(Boolean)
-      .sort((a, b) => {
-        const scoreA = parseFloat(a.score);
-        const scoreB = parseFloat(b.score);
-        return (scoreB > 10 || scoreB < -10) ? 1 : (scoreA - scoreB);
-      });
+      const filteredData = newData
+        .filter(Boolean)
+        .sort((a, b) => {
+          const scoreA = parseFloat(a.score);
+          const scoreB = parseFloat(b.score);
+          return (scoreB > 10 || scoreB < -10) ? 1 : (scoreA - scoreB);
+        });
 
-    setData([...filteredData.filter(d => Math.abs(parseFloat(d.score)) <= 10),
-      ...filteredData.filter(d => Math.abs(parseFloat(d.score)) > 10)])
-    setLastUpdate(new Date());
+      setData([...filteredData.filter(d => Math.abs(parseFloat(d.score)) <= 10),
+        ...filteredData.filter(d => Math.abs(parseFloat(d.score)) > 10)])
+      setLastUpdate(new Date());
+    } catch (error) {
+      console.error('数据更新失败:', error);
+    }
   };
 
   // 自动刷新
@@ -128,9 +142,9 @@ export default function Home() {
         borderBottom: '1px solid #eee'
       }}>
         <div>
-          <h2 style={{ margin: 0 }}>基差套利工具</h2>
+          <h2 style={{ margin: '0 0 8px 0' }}>基差套利工具</h2>
           <div style={{ color: '#666' }}>
-            {rangeCounts.map(({ range, count }) => (
+            {Object.entries(rangeCounts).map(([range, count]) => (
               <div key={range} style={{ margin: '2px 0' }}>
                 {range}: {count}个
               </div>
@@ -138,9 +152,9 @@ export default function Home() {
           </div>
         </div>
         
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <span>交易对: {displayedData.length}/{data.length}</span>
-          <span>{lastUpdate ? lastUpdate.toLocaleString() : '未更新'}</span>
+          <span>最后更新: {lastUpdate ? lastUpdate.toLocaleTimeString() : '未更新'}</span>
         </div>
       </nav>
 
@@ -150,7 +164,7 @@ export default function Home() {
           type="text"
           placeholder="搜索币种..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
           style={{
             padding: '6px 10px',
             marginRight: 10,
@@ -187,7 +201,7 @@ export default function Home() {
           </tr>
         </thead>
         <tbody>
-          {displayedData.map(row => (
+          {displayedData.map((row) => (
             <tr
               key={row.symbol}
               style={{
