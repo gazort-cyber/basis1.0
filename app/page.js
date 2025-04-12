@@ -35,8 +35,8 @@ export default function Home() {
           const spotPrice = parseFloat(spot.price);
           const futurePrice = parseFloat(future.price);
           const basisRate = ((futurePrice - spotPrice) / spotPrice) * 100;
-          const lastFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
-          const predictedFundingRate = parseFloat(premium.predictedFundingRate || 0) * 100;
+          const lastFundingRate = parseFloat(premium.interestRate || 0) * 100;
+          const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
           const score = basisRate - predictedFundingRate;
 
           return {
