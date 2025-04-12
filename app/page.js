@@ -23,7 +23,7 @@ export default function Home() {
 
     // 获取当前时间戳，并计算30天之前的时间戳（毫秒）
     const currentTime = Date.now();
-    const thirtyDaysAgo = currentTime - 30 * 24 * 60 * 60 * 1000;
+    const thirtyDaysAgo = currentTime - 3 * 24 * 60 * 60 * 1000;
 
     const newData = await Promise.all(
       symbols.map(async (symbol) => {
