@@ -127,16 +127,17 @@ export default function Home() {
     setUpperPrice(upperPrice);
     setLowerPrice(lowerPrice);
   };
-
-  const handleSymbolInput = () => {
-    // 根据输入的币种名称进行计算
-    if (selectedSymbol) {
-      const selectedData = data.find(item => item.symbol === selectedSymbol);
-      if (selectedData) {
-        calculatePosition(parseFloat(selectedData.spotPrice), parseFloat(selectedData.futurePrice));
-      }
-    }
-  };
+const handleSymbolInput = () => {
+  console.log("Selected Symbol:", selectedSymbol);  // 检查输入的币种符号
+  console.log("Data Array:", data);  // 检查 data 是否有数据
+  const selectedData = data.find(item => item.symbol === selectedSymbol);
+  console.log("Selected Data:", selectedData);  // 检查找到的数据
+  if (selectedData) {
+    calculatePosition(parseFloat(selectedData.spotPrice), parseFloat(selectedData.futurePrice));
+  } else {
+    alert('币种数据未找到');
+  }
+};
   
   const displayedData = [...data] 
     .sort((a, b) => { 
