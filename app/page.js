@@ -28,15 +28,17 @@ export default function Home() {
     const newData = await Promise.all(
       symbols.map(async (symbol) => {
         try {
-          const [spotRes, futureRes, premiumRes] = await Promise.all([
+          const [spotRes, futureRes, premiumRes, borrowRes] = await Promise.all([
             fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`),
             fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`),
-            fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`)
+            fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`),
+            fetch(`/api/borrow-status?symbol=${symbol}`)  // 调用新创建的 API 路径
           ]);
 
           const spot = await spotRes.json();
           const future = await futureRes.json();
           const premium = await premiumRes.json();
+          const borrow = await borrowRes.json();
 
           const spotPrice = parseFloat(spot.price);
           const futurePrice = parseFloat(future.price);
@@ -45,7 +47,6 @@ export default function Home() {
           const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
           const score = basisRate - predictedFundingRate;
 
-          // 检查合约是否下架，time 小于3天之前的时间戳
           if (premium.time && Number(premium.time) < threeDaysAgo) {
             return null;
           }
@@ -58,6 +59,8 @@ export default function Home() {
             lastFundingRate: lastFundingRate.toFixed(4),
             predictedFundingRate: predictedFundingRate.toFixed(4),
             score: score.toFixed(2),
+            borrowLimit: borrow.borrowLimit.toFixed(2),  // 添加借贷额度
+            free: borrow.free.toFixed(2)  // 添加可借余额
           };
         } catch (e) {
           return null;
@@ -66,16 +69,8 @@ export default function Home() {
     );
 
     const filteredData = newData.filter(Boolean);
-
-    // 将得分绝对值大于10的项提取出来放到最后面
-    const normalData = filteredData.filter(item => Math.abs(parseFloat(item.score)) <= 10);
-    const abnormalData = filteredData.filter(item => Math.abs(parseFloat(item.score)) > 10);
-
-    // 将正常数据按套利得分的绝对值从高到低排序，异常数据放到最后
-    const sortedNormalData = normalData.sort((a, b) => Math.abs(b.score) - Math.abs(a.score));
-
-    // 合并正常数据和异常数据
-    const combinedData = [...sortedNormalData, ...abnormalData];
+    const sortedNormalData = filteredData.sort((a, b) => Math.abs(b.score) - Math.abs(a.score));
+    const combinedData = [...sortedNormalData];
 
     setData(combinedData);
     setLastUpdated(new Date().toLocaleTimeString());
@@ -90,28 +85,6 @@ export default function Home() {
   const displayedData = data.filter(item =>
     item.symbol.toLowerCase().includes(search.toLowerCase())
   );
-
-  // 计算基差得分区间的交易对数量，范围为0到10
-  const calculateScoreRanges = () => {
-    const ranges = {};
-    for (let i = 0; i <= 10; i += 0.5) {
-      ranges[i] = 0;
-    }
-
-    data.forEach(item => {
-      const score = Math.abs(parseFloat(item.score));  // 使用绝对值
-      for (let i = 0; i <= 10; i += 0.5) {
-        if (score >= i && score < i + 0.5) {
-          ranges[i]++;
-          break;
-        }
-      }
-    });
-
-    return ranges;
-  };
-
-  const scoreRanges = calculateScoreRanges();
 
   return (
     <main style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
@@ -150,19 +123,6 @@ export default function Home() {
         <span style={{ marginLeft: 20 }}>更新时间: {lastUpdated}</span>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}>
-        {Object.keys(scoreRanges).map(range => {
-          if (scoreRanges[range] > 0) {
-            return (
-              <div key={range} style={{ marginRight: 20 }}>
-                <span>{`[${range}, ${parseFloat(range) + 0.5})`}: {scoreRanges[range]}</span>
-              </div>
-            );
-          }
-          return null;
-        })}
-      </div>
-
       <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
         <thead style={{ backgroundColor: '#f2f2f2' }}>
           <tr>
@@ -173,6 +133,7 @@ export default function Home() {
             <th>上次资金费率%</th>
             <th>预期资金费率%</th>
             <th>套利得分</th>
+            <th>可借余额</th>  {/* 新增列 */}
           </tr>
         </thead>
         <tbody>
@@ -180,25 +141,4 @@ export default function Home() {
             <tr
               key={row.symbol}
               style={{
-                backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'),
-                cursor: 'pointer'
-              }}
-            >
-              <td>{row.symbol}</td>
-              <td>{row.spotPrice}</td>
-              <td>{row.futurePrice}</td>
-              <td>{row.basisRate}</td>
-              <td>{row.lastFundingRate}</td>
-              <td>{row.predictedFundingRate}</td>
-              <td>{row.score}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <p style={{ fontSize: 12, marginTop: 10 }}>
-        每60秒自动刷新，按“基差率 - 预期资金费率”排序，高亮显示套利得分大于1的币种，基差得分大于10的异常值标红并放在最后。
-      </p>
-    </main>
-  );
-}
+                backgroundColor
