@@ -187,7 +187,18 @@ const handleSymbolInput = () => {
 return (
   <main style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
     <h1 style={{ marginBottom: 10, textAlign: 'center' }}>币安基差套利工具</h1>
-    
+
+{/* 搜索框 */}
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}>
+      <input
+        type="text"
+        placeholder="搜索币种..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ padding: '6px 10px', marginRight: 10, fontSize: 14, width: 200 }}
+      />
+    </div>
+
     {/* 手动输入币种和计算按钮 */}
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}>
       <input
