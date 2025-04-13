@@ -114,12 +114,20 @@ const displayedData = [...data]
     if (isAHighlighted && !isBHighlighted) return -1; // A排在前
     if (!isAHighlighted && isBHighlighted) return 1;  // B排在前
 
-    // 如果两个币种都是高亮或都不是高亮，则按绝对得分排序
+    // 处理正常值和异常值
+    const isAAbnormal = Math.abs(a.score) > 10;
+    const isBAbnormal = Math.abs(b.score) > 10;
+
+    if (isAAbnormal && !isBAbnormal) return 1; // A是异常值，排到后面
+    if (!isAAbnormal && isBAbnormal) return -1; // B是异常值，排到后面
+
+    // 如果两个币种都不是异常，按得分绝对值排序
     return Math.abs(b.score) - Math.abs(a.score); // 得分绝对值大的排前面
   })
   .filter(item =>
     item.symbol.toLowerCase().includes(search.toLowerCase())
   );
+
 
   // 计算基差得分区间的交易对数量，范围为0到10
   const calculateScoreRanges = () => {
