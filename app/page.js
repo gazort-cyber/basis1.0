@@ -116,11 +116,11 @@ const calculatePosition = (spotPrice, futurePrice) => {
     return;
   }
 
-  const maxPrice = Math.max(spotPrice, futurePrice);
+  const maxPrice = Math.max(spotPrice, futurePrice,score);
   const maxPosition = (k * n) / maxPrice;
 
   let upperPrice, lowerPrice;
-  if (parseFloat(selectedData.score) > 0) {  // 使用 selectedData.score 来决定套利得分
+  if (score > 0) {  // 使用 selectedData.score 来决定套利得分
     upperPrice = Math.max(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k));
     lowerPrice = Math.min(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k));
   } else { 
@@ -138,7 +138,7 @@ const handleSymbolInput = () => {
   const selectedData = data.find(item => item.symbol === selectedSymbol);
   console.log("Selected Data:", selectedData);  // 检查找到的数据
   if (selectedData) {
-    calculatePosition(parseFloat(selectedData.spotPrice), parseFloat(selectedData.futurePrice));
+    calculatePosition(parseFloat(selectedData.spotPrice), parseFloat(selectedData.futurePrice),parseFloat(selectedData.score));
   } else {
     alert('币种数据未找到');
   }
