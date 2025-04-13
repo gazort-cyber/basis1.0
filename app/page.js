@@ -7,6 +7,17 @@ export default function Home() {
   const [search, setSearch] = useState(''); 
   const [lastUpdated, setLastUpdated] = useState(null);
 
+  
+  // 新增的参数和计算逻辑
+  const [n, setN] = useState(1000); // 本金默认1000
+  const [k, setK] = useState(3); // 杠杆默认3
+  const [a, setA] = useState(0.06); // 现货滑点默认6%
+  const [b, setB] = useState(0.06); // 合约滑点默认6%
+  const [selectedSymbol, setSelectedSymbol] = useState('');
+  const [maxPosition, setMaxPosition] = useState(null);
+  const [upperPrice, setUpperPrice] = useState(null);
+  const [lowerPrice, setLowerPrice] = useState(null);
+
   // 高亮币种列表
   const highlightTokens = [ 
     "1INCHUSDT", "AAVEUSDT", "ADAUSDT", "ADXUSDT", "ARUSDT", "ATOMUSDT", "AUCTIONUSDT", "AVAXUSDT", "BCHUSDT", 
@@ -98,6 +109,34 @@ export default function Home() {
     return () => clearInterval(interval); 
   }, [symbols]);
 
+   // 计算最大仓位、上限价、下限价
+  const calculatePosition = (spotPrice, futurePrice) => {
+    const maxPrice = Math.max(spotPrice, futurePrice);
+    const maxPosition = (k * n) / maxPrice;
+
+    let upperPrice, lowerPrice;
+    if (parseFloat(row.score) > 0) { // 如果套利得分为正
+      upperPrice = Math.max(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k));
+      lowerPrice = Math.min(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k));
+    } else { // 如果套利得分为负
+      upperPrice = Math.max(spotPrice * (1 - (1 - a) / k), futurePrice * (1 + (1 - b) / k));
+      lowerPrice = Math.min(spotPrice * (1 - (1 - a) / k), futurePrice * (1 + (1 - b) / k));
+    }
+
+    setMaxPosition(maxPosition);
+    setUpperPrice(upperPrice);
+    setLowerPrice(lowerPrice);
+  };
+
+  const handleSymbolSelect = (symbol) => {
+    setSelectedSymbol(symbol);
+    // 根据所选币种获取现货和合约价格进行计算
+    const selectedData = data.find(item => item.symbol === symbol);
+    if (selectedData) {
+      calculatePosition(parseFloat(selectedData.spotPrice), parseFloat(selectedData.futurePrice));
+    }
+  };
+  
   const displayedData = [...data] 
     .sort((a, b) => { 
       // 优先考虑高亮币种 
@@ -137,42 +176,84 @@ export default function Home() {
 
   const scoreRanges = calculateScoreRanges();
 
-  return ( 
+
+  return (
     <main style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
       <h1 style={{ marginBottom: 10, textAlign: 'center' }}>币安基差套利工具</h1>
-
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}>
-        <input 
-          type="text" 
-          placeholder="搜索币种..." 
-          value={search} 
-          onChange={e => setSearch(e.target.value)} 
-          style={{ padding: '6px 10px', marginRight: 10, fontSize: 14, width: 200 }} 
+        <input
+          type="text"
+          placeholder="搜索币种..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ padding: '6px 10px', marginRight: 10, fontSize: 14, width: 200 }}
         />
-        <button 
-          onClick={fetchData} 
-          style={{ padding: '6px 12px', cursor: 'pointer', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: 4 }}
-        > 
-          手动刷新 
-        </button> 
+        <button onClick={fetchData} style={{ padding: '6px 12px', cursor: 'pointer', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: 4 }}>
+          手动刷新
+        </button>
       </div>
-
       <div style={{ textAlign: 'center', marginBottom: 15 }}>
-        <span>交易对数量: {displayedData.length}</span> 
+        <span>交易对数量: {displayedData.length}</span>
         <span style={{ marginLeft: 20 }}>更新时间: {lastUpdated}</span>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}>
-        {Object.keys(scoreRanges).map(range => { 
-          if (scoreRanges[range] > 0) { 
-            return (
-              <div key={range} style={{ marginRight: 20 }}>
-                <span>{`[${range}, ${parseFloat(range) + 0.5}) ${scoreRanges[range]}`}</span>
-              </div>
-            );
-          }
-          return null;
-        })}
+      {/* 计算区域 */}
+      <div style={{ marginBottom: 20 }}>
+        <h3>计算最大仓位、上限价和下限价</h3>
+        <div>
+          <label>选择币种:</label>
+          <select value={selectedSymbol} onChange={(e) => handleSymbolSelect(e.target.value)}>
+            <option value="">选择币种</option>
+            {symbols.map(symbol => (
+              <option key={symbol} value={symbol}>{symbol}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label>本金 (n):</label>
+          <input
+            type="number"
+            value={n}
+            onChange={(e) => setN(e.target.value)}
+            style={{ padding: '6px', marginRight: '10px' }}
+          />
+        </div>
+        <div>
+          <label>杠杆 (k):</label>
+          <input
+            type="number"
+            value={k}
+            onChange={(e) => setK(e.target.value)}
+            style={{ padding: '6px', marginRight: '10px' }}
+          />
+        </div>
+        <div>
+          <label>现货滑点 (a):</label>
+          <input
+            type="number"
+            step="0.01"
+            value={a}
+            onChange={(e) => setA(e.target.value)}
+            style={{ padding: '6px', marginRight: '10px' }}
+          />
+        </div>
+        <div>
+          <label>合约滑点 (b):</label>
+          <input
+            type="number"
+            step="0.01"
+            value={b}
+            onChange={(e) => setB(e.target.value)}
+            style={{ padding: '6px', marginRight: '10px' }}
+          />
+        </div>
+        {selectedSymbol && (
+          <div>
+            <p>最大仓位: {maxPosition ? maxPosition.toFixed(2) : 'N/A'}</p>
+            <p>上限价: {upperPrice ? upperPrice.toFixed(2) : 'N/A'}</p>
+            <p>下限价: {lowerPrice ? lowerPrice.toFixed(2) : 'N/A'}</p>
+          </div>
+        )}
       </div>
 
       <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
@@ -189,13 +270,8 @@ export default function Home() {
         </thead>
         <tbody>
           {displayedData.map(row => (
-            <tr 
-              key={row.symbol} 
-              style={{ backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'), cursor: 'pointer' }}
-            >
-              <td style={{ backgroundColor: highlightTokens.includes(row.symbol) ? '#d3f9d8' : 'transparent' }}>
-                {row.symbol}
-              </td>
+            <tr key={row.symbol} style={{ backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'), cursor: 'pointer' }}>
+              <td style={{ backgroundColor: highlightTokens.includes(row.symbol) ? '#d3f9d8' : 'transparent' }} > {row.symbol} </td>
               <td>{row.spotPrice}</td>
               <td>{row.futurePrice}</td>
               <td>{row.basisRate}</td>
@@ -207,5 +283,5 @@ export default function Home() {
         </tbody>
       </table>
     </main>
-  ); 
+  );
 }
