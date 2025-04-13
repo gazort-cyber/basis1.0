@@ -184,4 +184,4 @@ export default function Home() {
         })}
       </div>
 
-      <table border="1>
+      <table border="1">
