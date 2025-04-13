@@ -94,11 +94,7 @@ export default function Home() {
     // 合并正常数据和异常数据
     const combinedData = [...sortedNormalData, ...abnormalData];
 
-    // 将高亮币种的项排到最前面
-    const highlightedData = combinedData.filter(item => highlightTokens.includes(item.symbol));
-    const otherData = combinedData.filter(item => !highlightTokens.includes(item.symbol));
-
-    setData([...highlightedData, ...otherData]);
+    setData(combinedData);
     setLastUpdated(new Date().toLocaleTimeString());
   };
 
@@ -176,4 +172,15 @@ export default function Home() {
           if (scoreRanges[range] > 0) {
             return (
               <div key={range} style={{ marginRight: 20 }}>
-                <span>{`[${
+                <span>{`[${range}, ${parseFloat(range) + 0.5}) ${scoreRanges[range]}`}</span>
+              </div>
+            );
+          }
+          return null;
+        })}
+      </div>
+
+      <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
+        <thead style={{ backgroundColor: '#f2f2f2' }}>
+          <tr>
+            <th>币种</th>
