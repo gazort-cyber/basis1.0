@@ -247,9 +247,9 @@ return (
     {/* 显示计算结果 */}
     {selectedSymbol && (
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
-        <p>最大仓位: {maxPosition ? maxPosition.toFixed(2) : 'N/A'}</p>
-        <p>上限价: {upperPrice ? upperPrice.toFixed(2) : 'N/A'}</p>
-        <p>下限价: {lowerPrice ? lowerPrice.toFixed(2) : 'N/A'}</p>
+        <p>最大仓位: {maxPosition ? maxPosition.toFixed(5) : 'N/A'}</p>
+        <p>上限价: {upperPrice ? upperPrice.toFixed(10) : 'N/A'}</p>
+        <p>下限价: {lowerPrice ? lowerPrice.toFixed(10) : 'N/A'}</p>
       </div>
     )}
 
