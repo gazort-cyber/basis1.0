@@ -184,5 +184,31 @@ export default function Home() {
         })}
       </div>
 
-  <table border="1">
+<table border="1">
+  <thead>
+    <tr>
+      <th>符号</th>
+      <th>现货价格</th>
+      <th>期货价格</th>
+      <th>基差率</th>
+      <th>最后资金费率</th>
+      <th>预测资金费率</th>
+      <th>得分</th>
+    </tr>
+  </thead>
+  <tbody>
+    {displayedData.map((item) => (
+      <tr key={item.symbol}>
+        <td>{item.symbol}</td>
+        <td>{item.spotPrice}</td>
+        <td>{item.futurePrice}</td>
+        <td>{item.basisRate}</td>
+        <td>{item.lastFundingRate}</td>
+        <td>{item.predictedFundingRate}</td>
+        <td>{item.score}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
 
