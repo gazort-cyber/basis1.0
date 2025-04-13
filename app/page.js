@@ -92,6 +92,7 @@ const [lowerLimit, setLowerLimit] = useState(null);    // 下限价
         }
       })
     );
+    };
 const calculateLimits = () => {
   if (!selectedSymbol) return;
 
