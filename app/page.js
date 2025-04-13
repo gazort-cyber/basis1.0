@@ -129,8 +129,8 @@ const calculatePosition = (spotPrice, futurePrice,score) => {
   }
 
   setMaxPosition(maxPosition);
-  setUpperPrice(upperPrice);
-  setLowerPrice(lowerPrice);
+  setUpperPrice(upperPrice.toFixed(10));
+  setLowerPrice(lowerPrice.toFixed(10));
 };
 const handleSymbolInput = () => {
   console.log("Selected Symbol:", selectedSymbol);  // 检查输入的币种符号
