@@ -151,7 +151,7 @@ export default function Home() {
               <tr
                 key={row.symbol}
                 style={{
-                  backgroundColor: parseFloat(row.score) > 1 ? '#fff4d6' : 'white',
+                  backgroundColor: Math.abs(parseFloat(row.score)) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'),
                   cursor: 'pointer'
                 }}
               >
