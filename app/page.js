@@ -22,8 +22,8 @@ export default function Home() {
   "TIMUSDT", "TKOUSDT", "TONUSDT", "TRBUSDT", "TROYUSDT", "TRXUSDT", "TURBOUSDT", 
   "UNIUSDT", "UTKUSDT", "VETUSDT", "WIFUSDT", "XRPUSDT", "XTZUSDT", "YFIUSDT", "YGGUSDT", 
   "ZECUSDT", "ZILUSDT", "ZRXUSDT"
-];
-
+]
+;
 
   // 获取交易对符号
   useEffect(() => {
@@ -47,9 +47,9 @@ export default function Home() {
       symbols.map(async (symbol) => {
         try {
           const [spotRes, futureRes, premiumRes] = await Promise.all([
-            fetch(https://api.binance.com/api/v3/ticker/price?symbol=${symbol}),
-            fetch(https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}),
-            fetch(https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol})
+            fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`),
+            fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`),
+            fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`)
           ]);
 
           const spot = await spotRes.json();
@@ -173,7 +173,7 @@ export default function Home() {
           if (scoreRanges[range] > 0) {
             return (
               <div key={range} style={{ marginRight: 20 }}>
-                <span>{[${range}, ${parseFloat(range) + 0.5}) ${scoreRanges[range]}}</span>
+                <span>{`[${range}, ${parseFloat(range) + 0.5}) ${scoreRanges[range]}`}</span>
               </div>
             );
           }
