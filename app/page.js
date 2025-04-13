@@ -65,14 +65,19 @@ export default function Home() {
       })
     );
 
-    const filteredData = newData.filter(Boolean).sort((a, b) => {
-      // 基差得分绝对值大于10的标红并放到最后面
-      if (Math.abs(b.score) > 10) return 1;
-      if (Math.abs(a.score) > 10) return -1;
-      return b.score - a.score;
-    });
+    const filteredData = newData.filter(Boolean);
 
-    setData(filteredData);
+    // 将得分绝对值大于10的项提取出来放到最后面
+    const normalData = filteredData.filter(item => Math.abs(parseFloat(item.score)) <= 10);
+    const abnormalData = filteredData.filter(item => Math.abs(parseFloat(item.score)) > 10);
+
+    // 将正常数据按套利得分的绝对值从高到低排序，异常数据放到最后
+    const sortedNormalData = normalData.sort((a, b) => Math.abs(b.score) - Math.abs(a.score));
+
+    // 合并正常数据和异常数据
+    const combinedData = [...sortedNormalData, ...abnormalData];
+
+    setData(combinedData);
     setLastUpdated(new Date().toLocaleTimeString());
   };
 
@@ -86,16 +91,16 @@ export default function Home() {
     item.symbol.toLowerCase().includes(search.toLowerCase())
   );
 
-  // 计算基差得分区间的交易对数量
+  // 计算基差得分区间的交易对数量，范围为0到10
   const calculateScoreRanges = () => {
     const ranges = {};
-    for (let i = -10; i <= 10; i += 0.5) {
+    for (let i = 0; i <= 10; i += 0.5) {
       ranges[i] = 0;
     }
 
     data.forEach(item => {
-      const score = parseFloat(item.score);
-      for (let i = -10; i <= 10; i += 0.5) {
+      const score = Math.abs(parseFloat(item.score));  // 使用绝对值
+      for (let i = 0; i <= 10; i += 0.5) {
         if (score >= i && score < i + 0.5) {
           ranges[i]++;
           break;
