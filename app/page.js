@@ -164,7 +164,7 @@ export default function Home() {
           if (scoreRanges[range] > 0) {
             return (
               <div key={range} style={{ marginRight: 20 }}>
-                <span>{`[${range}, ${parseFloat(range) + 0.5})`: {scoreRanges[range]}</span>
+                <span>{`[${range}, ${parseFloat(range) + 0.5})`} : {scoreRanges[range]}</span>
               </div>
             );
           }
@@ -205,4 +205,11 @@ export default function Home() {
               <td>{row.basisRate}</td>
               <td>{row.lastFundingRate}</td>
               <td>{row.predictedFundingRate}</td>
-              <td
+              <td>{row.score}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </main>
+  );
+}
