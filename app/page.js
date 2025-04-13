@@ -181,6 +181,4 @@ export default function Home() {
       </div>
 
       <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
-        <thead style={{ backgroundColor: '#f2f2f2' }}>
-          <tr>
-            <th>币种</th>
+        <thead style={{ backgroundColor: '#f2f2f2
