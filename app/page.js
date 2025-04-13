@@ -110,13 +110,13 @@ export default function Home() {
   }, [symbols]);
 
    // 计算最大仓位、上限价、下限价
-const calculatePosition = (spotPrice, futurePrice) => {
+const calculatePosition = (spotPrice, futurePrice,score) => {
   if (isNaN(spotPrice) || isNaN(futurePrice)) {
     alert('价格数据无效');
     return;
   }
 
-  const maxPrice = Math.max(spotPrice, futurePrice,score);
+  const maxPrice = Math.max(spotPrice, futurePrice);
   const maxPosition = (k * n) / maxPrice;
 
   let upperPrice, lowerPrice;
