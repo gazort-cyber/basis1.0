@@ -105,7 +105,19 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [symbols]);
 
-  const displayedData = data.filter(item =>
+const displayedData = [...data]
+  .sort((a, b) => {
+    // 优先考虑高亮币种
+    const isAHighlighted = highlightTokens.includes(a.symbol);
+    const isBHighlighted = highlightTokens.includes(b.symbol);
+    
+    if (isAHighlighted && !isBHighlighted) return -1; // A排在前
+    if (!isAHighlighted && isBHighlighted) return 1;  // B排在前
+
+    // 如果两个币种都是高亮或都不是高亮，则按绝对得分排序
+    return Math.abs(b.score) - Math.abs(a.score); // 得分绝对值大的排前面
+  })
+  .filter(item =>
     item.symbol.toLowerCase().includes(search.toLowerCase())
   );
 
