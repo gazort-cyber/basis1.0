@@ -181,39 +181,28 @@ export default function Home() {
 return (
   <main style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
     <h1 style={{ marginBottom: 10, textAlign: 'center' }}>币安基差套利工具</h1>
+    
+    {/* 手动输入币种和计算按钮 */}
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}>
       <input
         type="text"
-        placeholder="搜索币种..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
+        placeholder="输入币种..."
+        value={selectedSymbol}
+        onChange={(e) => setSelectedSymbol(e.target.value.toUpperCase())}
         style={{ padding: '6px 10px', marginRight: 10, fontSize: 14, width: 200 }}
       />
       <button
-        onClick={fetchData}
-        style={{ padding: '6px 12px', cursor: 'pointer', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: 4 }}
+        onClick={handleSymbolInput}
+        style={{ padding: '6px 12px', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: 4 }}
       >
-        手动刷新
+        计算
       </button>
-    </div>
-    <div style={{ textAlign: 'center', marginBottom: 15 }}>
-      <span>交易对数量: {displayedData.length}</span>
-      <span style={{ marginLeft: 20 }}>更新时间: {lastUpdated}</span>
     </div>
 
     {/* 计算区域 */}
-    <div style={{ marginBottom: 20 }}>
-      <h3>计算最大仓位、上限价和下限价</h3>
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-        <label style={{ marginRight: 10 }}>选择币种:</label>
-        <select value={selectedSymbol} onChange={(e) => handleSymbolSelect(e.target.value)}>
-          <option value="">选择币种</option>
-          {symbols.map(symbol => (
-            <option key={symbol} value={symbol}>{symbol}</option>
-          ))}
-        </select>
-
-        <label style={{ marginLeft: 20, marginRight: 10 }}>本金 (n):</label>
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+      <div>
+        <label style={{ marginRight: 10 }}>本金 (n):</label>
         <input
           type="number"
           value={n}
@@ -246,25 +235,25 @@ return (
           onChange={(e) => setB(e.target.value)}
           style={{ padding: '6px', marginRight: '10px' }}
         />
-
-        <button
-          onClick={calculateResults}
-          style={{ padding: '6px 12px', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: 4 }}
-        >
-          计算
-        </button>
       </div>
-
-      {/* 计算结果显示 */}
-      {selectedSymbol && (
-        <div style={{ textAlign: 'center' }}>
-          <p>最大仓位: {maxPosition ? maxPosition.toFixed(2) : 'N/A'}</p>
-          <p>上限价: {upperPrice ? upperPrice.toFixed(2) : 'N/A'}</p>
-          <p>下限价: {lowerPrice ? lowerPrice.toFixed(2) : 'N/A'}</p>
-        </div>
-      )}
     </div>
 
+    {/* 显示计算结果 */}
+    {selectedSymbol && (
+      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+        <p>最大仓位: {maxPosition ? maxPosition.toFixed(2) : 'N/A'}</p>
+        <p>上限价: {upperPrice ? upperPrice.toFixed(2) : 'N/A'}</p>
+        <p>下限价: {lowerPrice ? lowerPrice.toFixed(2) : 'N/A'}</p>
+      </div>
+    )}
+
+    {/* 交易对数量和更新时间 */}
+    <div style={{ textAlign: 'center', marginBottom: 15 }}>
+      <span>交易对数量: {displayedData.length}</span>
+      <span style={{ marginLeft: 20 }}>更新时间: {lastUpdated}</span>
+    </div>
+
+    {/* 交易对数据表格 */}
     <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
       <thead style={{ backgroundColor: '#f2f2f2' }}>
         <tr>
@@ -278,7 +267,7 @@ return (
         </tr>
       </thead>
       <tbody>
-        {displayedData.map(row => (
+        {displayedData.map((row) => (
           <tr key={row.symbol} style={{ backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'), cursor: 'pointer' }}>
             <td style={{ backgroundColor: highlightTokens.includes(row.symbol) ? '#d3f9d8' : 'transparent' }}>{row.symbol}</td>
             <td>{row.spotPrice}</td>
