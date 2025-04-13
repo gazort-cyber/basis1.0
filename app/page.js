@@ -7,7 +7,7 @@ export default function Home() {
   const [search, setSearch] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  // List of tokens to highlight
+  // 高亮币种列表
   const highlightTokens = [
     "1INCHUSDT", "AAVEUSDT", "ADAUSDT", "ADXUSDT", "ARUSDT", "ATOMUSDT", "AUCTIONUSDT", 
     "AVAXUSDT", "BCHUSDT", "BOMEUSDT", "BNBUSDT", "CAKEUSDT", "CFXUSDT", "CHZUSDT", 
