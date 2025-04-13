@@ -8,13 +8,22 @@ export default function Home() {
   const [lastUpdated, setLastUpdated] = useState(null);
 
   // List of tokens to highlight
-  const highlightTokens = [
-    "1INCH", "AAVE", "ADA", "ADX", "AR", "ATOM", "AUCTION", "AVAX", "BCH", "BOME", "BNB", "CAKE", "CFX", "CHZ", "COMP", "CRV", "DASH", "DEGO", 
-    "DEXE", "DOGE", "DOT", "EGLD", "ELF", "ENJ", "ENS", "ETC", "ETT", "FET", "FIL", "FIS", "FLOW", "FORTH", "GALA", "GRT", "HARD", "HBAR", "IOTA", 
-    "IOTX", "JTO", "JUP", "KAVA", "KSM", "LINK", "LPT", "LTC", "LUNA", "MANA", "MASK", "MBOX", "MKR", "NEAR", "NOT", "OM", "ONE", "OP", "PENGU", 
-    "PLYTH", "POL", "RSU", "RUNE", "SAND", "SEI", "SHIB", "SKL", "SNX", "SOL", "STX", "SUI", "SUPER", "THETA", "TIA", "TIM", "TKO", "TON", "TRB", 
-    "TROY", "TRX", "TURBO", "UNI", "UTK", "VET", "WIF", "XRP", "XTZ", "YFI", "YGG", "ZEC", "ZIL", "ZRX"
-  ];
+  const highlightTokens =[
+  "1INCHUSDT", "AAVEUSDT", "ADAUSDT", "ADXUSDT", "ARUSDT", "ATOMUSDT", "AUCTIONUSDT", 
+  "AVAXUSDT", "BCHUSDT", "BOMEUSDT", "BNBUSDT", "CAKEUSDT", "CFXUSDT", "CHZUSDT", 
+  "COMPUSDT", "CRVUSDT", "DASHUSDT", "DEGOUSDT", "DEXEUSDT", "DOGEUSDT", "DOTUSDT", 
+  "EGLDUSDT", "ELFUSDT", "ENJUSDT", "ENSUSDT", "ETCUSDT", "ETTUSDT", "FETUSDT", "FILUSDT", 
+  "FISUSDT", "FLOWUSDT", "FORTHUSDT", "GALAUSDT", "GRTUSDT", "HARDUSDT", "HBARUSDT", 
+  "IOTAUSDT", "IOTXUSDT", "JTOUSDT", "JUPUSDT", "KAVAUSDT", "KSMUSDT", "LINKUSDT", 
+  "LPTUSDT", "LTCUSDT", "LUNAUSDT", "MANAUSDT", "MASKUSDT", "MBOXUSDT", "MKRUSDT", 
+  "NEARUSDT", "NOTUSDT", "OMUSDT", "ONEUSDT", "OPUSDT", "PENGUUSDT", "PLYTHUSDT", 
+  "POLUSDT", "RSUUSDT", "RUNEUSDT", "SANDUSDT", "SEIUSDT", "SHIBUSDT", "SKLUSDT", 
+  "SNXUSDT", "SOLUSDT", "STXUSDT", "SUIUSDT", "SUPERUSDT", "THETAUSDT", "TIAUSDT", 
+  "TIMUSDT", "TKOUSDT", "TONUSDT", "TRBUSDT", "TROYUSDT", "TRXUSDT", "TURBOUSDT", 
+  "UNIUSDT", "UTKUSDT", "VETUSDT", "WIFUSDT", "XRPUSDT", "XTZUSDT", "YFIUSDT", "YGGUSDT", 
+  "ZECUSDT", "ZILUSDT", "ZRXUSDT"
+];
+
 
   // 获取交易对符号
   useEffect(() => {
