@@ -204,7 +204,7 @@ export default function Home() {
             >
               <td
                 style={{
-                  backgroundColor: highlightTokens.includes(row.symbol) ? '#ffeb3b' : 'transparent',
+                  backgroundColor: highlightTokens.includes(row.symbol) ? '#d3f9d8' : 'transparent',
                 }}
               >
                 {row.symbol}
