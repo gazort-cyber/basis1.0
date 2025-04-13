@@ -1,122 +1,81 @@
 'use client'; 
 import { useEffect, useState } from 'react';
 
-export default function Home() {
-  const [data, setData] = useState([]);
-  const [symbols, setSymbols] = useState([]);
-  const [search, setSearch] = useState('');
+export default function Home() { 
+  const [data, setData] = useState([]); 
+  const [symbols, setSymbols] = useState([]); 
+  const [search, setSearch] = useState(''); 
   const [lastUpdated, setLastUpdated] = useState(null);
-  // 输入参数
-const [n, setN] = useState(1000);  // 本金
-const [k, setK] = useState(3);     // 杠杆
-const [a, setA] = useState(0.06);  // 现货滑点
-const [b, setB] = useState(0.06);  // 合约滑点
-const [selectedSymbol, setSelectedSymbol] = useState('');  // 当前选择的币种
-const [maxPosition, setMaxPosition] = useState(null);  // 最大仓位
-const [upperLimit, setUpperLimit] = useState(null);    // 上限价
-const [lowerLimit, setLowerLimit] = useState(null);    // 下限价
-
 
   // 高亮币种列表
-  const highlightTokens =[
-  "1INCHUSDT", "AAVEUSDT", "ADAUSDT", "ADXUSDT", "ARUSDT", "ATOMUSDT", "AUCTIONUSDT", 
-  "AVAXUSDT", "BCHUSDT", "BOMEUSDT", "BNBUSDT", "CAKEUSDT", "CFXUSDT", "CHZUSDT", 
-  "COMPUSDT", "CRVUSDT", "DASHUSDT", "DEGOUSDT", "DEXEUSDT", "DOGEUSDT", "DOTUSDT", 
-  "EGLDUSDT", "ELFUSDT", "ENJUSDT", "ENSUSDT", "ETCUSDT", "ETTUSDT", "FETUSDT", "FILUSDT", 
-  "FISUSDT", "FLOWUSDT", "FORTHUSDT", "GALAUSDT", "GRTUSDT", "HARDUSDT", "HBARUSDT", 
-  "IOTAUSDT", "IOTXUSDT", "JTOUSDT", "JUPUSDT", "KAVAUSDT", "KSMUSDT", "LINKUSDT", 
-  "LPTUSDT", "LTCUSDT", "LUNAUSDT", "MANAUSDT", "MASKUSDT", "MBOXUSDT", "MKRUSDT", 
-  "NEARUSDT", "NOTUSDT", "OMUSDT", "ONEUSDT", "OPUSDT", "PENGUUSDT", "PLYTHUSDT", 
-  "POLUSDT", "RSUUSDT", "RUNEUSDT", "SANDUSDT", "SEIUSDT", "SHIBUSDT", "SKLUSDT", 
-  "SNXUSDT", "SOLUSDT", "STXUSDT", "SUIUSDT", "SUPERUSDT", "THETAUSDT", "TIAUSDT", 
-  "TIMUSDT", "TKOUSDT", "TONUSDT", "TRBUSDT", "TROYUSDT", "TRXUSDT", "TURBOUSDT", 
-  "UNIUSDT", "UTKUSDT", "VETUSDT", "WIFUSDT", "XRPUSDT", "XTZUSDT", "YFIUSDT", "YGGUSDT", 
-  "ZECUSDT", "ZILUSDT", "ZRXUSDT"
-]
-;
+  const highlightTokens = [ 
+    "1INCHUSDT", "AAVEUSDT", "ADAUSDT", "ADXUSDT", "ARUSDT", "ATOMUSDT", "AUCTIONUSDT", "AVAXUSDT", "BCHUSDT", 
+    "BOMEUSDT", "BNBUSDT", "CAKEUSDT", "CFXUSDT", "CHZUSDT", "COMPUSDT", "CRVUSDT", "DASHUSDT", "DEGOUSDT", 
+    "DEXEUSDT", "DOGEUSDT", "DOTUSDT", "EGLDUSDT", "ELFUSDT", "ENJUSDT", "ENSUSDT", "ETCUSDT", "ETTUSDT", 
+    "FETUSDT", "FILUSDT", "FISUSDT", "FLOWUSDT", "FORTHUSDT", "GALAUSDT", "GRTUSDT", "HARDUSDT", "HBARUSDT", 
+    "IOTAUSDT", "IOTXUSDT", "JTOUSDT", "JUPUSDT", "KAVAUSDT", "KSMUSDT", "LINKUSDT", "LPTUSDT", "LTCUSDT", 
+    "LUNAUSDT", "MANAUSDT", "MASKUSDT", "MBOXUSDT", "MKRUSDT", "NEARUSDT", "NOTUSDT", "OMUSDT", "ONEUSDT", 
+    "OPUSDT", "PENGUUSDT", "PLYTHUSDT", "POLUSDT", "RSUUSDT", "RUNEUSDT", "SANDUSDT", "SEIUSDT", "SHIBUSDT", 
+    "SKLUSDT", "SNXUSDT", "SOLUSDT", "STXUSDT", "SUIUSDT", "SUPERUSDT", "THETAUSDT", "TIAUSDT", "TIMUSDT", 
+    "TKOUSDT", "TONUSDT", "TRBUSDT", "TROYUSDT", "TRXUSDT", "TURBOUSDT", "UNIUSDT", "UTKUSDT", "VETUSDT", 
+    "WIFUSDT", "XRPUSDT", "XTZUSDT", "YFIUSDT", "YGGUSDT", "ZECUSDT", "ZILUSDT", "ZRXUSDT"
+  ];
 
   // 获取交易对符号
-  useEffect(() => {
-    async function fetchSymbols() {
-      const res = await fetch('https://fapi.binance.com/fapi/v1/ticker/price');
-      const all = await res.json();
-      const filtered = all.filter(s => s.symbol.endsWith('USDT'));
-      setSymbols(filtered.map(s => s.symbol));
+  useEffect(() => { 
+    async function fetchSymbols() { 
+      const res = await fetch('https://fapi.binance.com/fapi/v1/ticker/price'); 
+      const all = await res.json(); 
+      const filtered = all.filter(s => s.symbol.endsWith('USDT')); 
+      setSymbols(filtered.map(s => s.symbol)); 
     }
-    fetchSymbols();
+    fetchSymbols(); 
   }, []);
 
   // 获取合约数据，并过滤3天前的下架合约
-  const fetchData = async () => {
-    if (symbols.length === 0) return;
+  const fetchData = async () => { 
+    if (symbols.length === 0) return; 
+    const currentTime = Date.now(); 
+    const threeDaysAgo = currentTime - 3 * 24 * 60 * 60 * 1000; 
 
-    const currentTime = Date.now();
-    const threeDaysAgo = currentTime - 3 * 24 * 60 * 60 * 1000;
-
-    const newData = await Promise.all(
-      symbols.map(async (symbol) => {
-        try {
-          const [spotRes, futureRes, premiumRes] = await Promise.all([
-            fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`),
-            fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`),
-            fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`)
-          ]);
-
-          const spot = await spotRes.json();
-          const future = await futureRes.json();
-          const premium = await premiumRes.json();
-
-          const spotPrice = parseFloat(spot.price);
-          const futurePrice = parseFloat(future.price);
-          const basisRate = ((spotPrice - futurePrice) / futurePrice) * 100;
-          const lastFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
-          const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100;
-          const score = basisRate - predictedFundingRate;
+    const newData = await Promise.all( 
+      symbols.map(async (symbol) => { 
+        try { 
+          const [spotRes, futureRes, premiumRes] = await Promise.all([ 
+            fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`), 
+            fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`), 
+            fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`) 
+          ]); 
+          const spot = await spotRes.json(); 
+          const future = await futureRes.json(); 
+          const premium = await premiumRes.json(); 
+          
+          const spotPrice = parseFloat(spot.price); 
+          const futurePrice = parseFloat(future.price); 
+          const basisRate = ((spotPrice - futurePrice) / futurePrice) * 100; 
+          const lastFundingRate = parseFloat(premium.lastFundingRate || 0) * 100; 
+          const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100; 
+          const score = basisRate - predictedFundingRate; 
 
           // 检查合约是否下架，time 小于3天之前的时间戳
-          if (premium.time && Number(premium.time) < threeDaysAgo) {
-            return null;
-          }
+          if (premium.time && Number(premium.time) < threeDaysAgo) { 
+            return null; 
+          } 
 
-          return {
-            symbol,
-            spotPrice,
-            futurePrice,
-            basisRate: basisRate.toFixed(2),
-            lastFundingRate: lastFundingRate.toFixed(4),
-            predictedFundingRate: predictedFundingRate.toFixed(4),
-            score: score.toFixed(2),
-          };
-        } catch (e) {
-          return null;
-        }
-      })
+          return { 
+            symbol, 
+            spotPrice, 
+            futurePrice, 
+            basisRate: basisRate.toFixed(2), 
+            lastFundingRate: lastFundingRate.toFixed(4), 
+            predictedFundingRate: predictedFundingRate.toFixed(4), 
+            score: score.toFixed(2), 
+          }; 
+        } catch (e) { 
+          return null; 
+        } 
+      }) 
     );
-    };
-const calculateLimits = () => {
-  if (!selectedSymbol) return;
-
-  const spotPrice = data.find(item => item.symbol === selectedSymbol)?.spotPrice;
-  const futurePrice = data.find(item => item.symbol === selectedSymbol)?.futurePrice;
-
-  if (spotPrice && futurePrice) {
-    // 计算最大仓位
-    const maxPosition = (k * n) / Math.max(spotPrice, futurePrice);
-
-    // 计算上限价和下限价
-    const upperLimit = parseFloat(
-      Math.max(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k))
-    ).toFixed(2);
-
-    const lowerLimit = parseFloat(
-      Math.min(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k))
-    ).toFixed(2);
-
-    setMaxPosition(maxPosition.toFixed(2));
-    setUpperLimit(upperLimit);
-    setLowerLimit(lowerLimit);
-  }
-};
 
     const filteredData = newData.filter(Boolean);
 
@@ -129,103 +88,83 @@ const calculateLimits = () => {
 
     // 合并正常数据和异常数据
     const combinedData = [...sortedNormalData, ...abnormalData];
-
     setData(combinedData);
     setLastUpdated(new Date().toLocaleTimeString());
   };
 
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 60000);
-    return () => clearInterval(interval);
+  useEffect(() => { 
+    fetchData(); 
+    const interval = setInterval(fetchData, 60000); 
+    return () => clearInterval(interval); 
   }, [symbols]);
 
-const displayedData = [...data]
-  .sort((a, b) => {
-    // 优先考虑高亮币种
-    const isAHighlighted = highlightTokens.includes(a.symbol);
-    const isBHighlighted = highlightTokens.includes(b.symbol);
-    
-    if (isAHighlighted && !isBHighlighted) return -1; // A排在前
-    if (!isAHighlighted && isBHighlighted) return 1;  // B排在前
+  const displayedData = [...data] 
+    .sort((a, b) => { 
+      // 优先考虑高亮币种 
+      const isAHighlighted = highlightTokens.includes(a.symbol); 
+      const isBHighlighted = highlightTokens.includes(b.symbol); 
+      if (isAHighlighted && !isBHighlighted) return -1; // A排在前 
+      if (!isAHighlighted && isBHighlighted) return 1; // B排在前 
 
-    // 处理正常值和异常值
-    const isAAbnormal = Math.abs(a.score) > 10;
-    const isBAbnormal = Math.abs(b.score) > 10;
+      // 处理正常值和异常值 
+      const isAAbnormal = Math.abs(a.score) > 10; 
+      const isBAbnormal = Math.abs(b.score) > 10; 
+      if (isAAbnormal && !isBAbnormal) return 1; // A是异常值，排到后面 
+      if (!isAAbnormal && isBAbnormal) return -1; // B是异常值，排到后面 
 
-    if (isAAbnormal && !isBAbnormal) return 1; // A是异常值，排到后面
-    if (!isAAbnormal && isBAbnormal) return -1; // B是异常值，排到后面
-
-    // 如果两个币种都不是异常，按得分绝对值排序
-    return Math.abs(b.score) - Math.abs(a.score); // 得分绝对值大的排前面
-  })
-  .filter(item =>
-    item.symbol.toLowerCase().includes(search.toLowerCase())
-  );
-
+      // 如果两个币种都不是异常，按得分绝对值排序
+      return Math.abs(b.score) - Math.abs(a.score); 
+    }) 
+    .filter(item => item.symbol.toLowerCase().includes(search.toLowerCase()));
 
   // 计算基差得分区间的交易对数量，范围为0到10
-  const calculateScoreRanges = () => {
-    const ranges = {};
-    for (let i = 0; i <= 10; i += 0.5) {
-      ranges[i] = 0;
-    }
-
-    data.forEach(item => {
-      const score = Math.abs(parseFloat(item.score));  // 使用绝对值
-      for (let i = 0; i <= 10; i += 0.5) {
-        if (score >= i && score < i + 0.5) {
-          ranges[i]++;
-          break;
-        }
-      }
-    });
-
-    return ranges;
+  const calculateScoreRanges = () => { 
+    const ranges = {}; 
+    for (let i = 0; i <= 10; i += 0.5) { 
+      ranges[i] = 0; 
+    } 
+    data.forEach(item => { 
+      const score = Math.abs(parseFloat(item.score)); // 使用绝对值 
+      for (let i = 0; i <= 10; i += 0.5) { 
+        if (score >= i && score < i + 0.5) { 
+          ranges[i]++; 
+          break; 
+        } 
+      } 
+    }); 
+    return ranges; 
   };
 
   const scoreRanges = calculateScoreRanges();
 
-  return (
+  return ( 
     <main style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
       <h1 style={{ marginBottom: 10, textAlign: 'center' }}>币安基差套利工具</h1>
 
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}>
-        <input
-          type="text"
-          placeholder="搜索币种..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{
-            padding: '6px 10px',
-            marginRight: 10,
-            fontSize: 14,
-            width: 200
-          }}
+        <input 
+          type="text" 
+          placeholder="搜索币种..." 
+          value={search} 
+          onChange={e => setSearch(e.target.value)} 
+          style={{ padding: '6px 10px', marginRight: 10, fontSize: 14, width: 200 }} 
         />
-        <button
-          onClick={fetchData}
-          style={{
-            padding: '6px 12px',
-            cursor: 'pointer',
-            backgroundColor: '#0070f3',
-            color: 'white',
-            border: 'none',
-            borderRadius: 4
-          }}
-        >
-          手动刷新
-        </button>
+        <button 
+          onClick={fetchData} 
+          style={{ padding: '6px 12px', cursor: 'pointer', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: 4 }}
+        > 
+          手动刷新 
+        </button> 
       </div>
 
       <div style={{ textAlign: 'center', marginBottom: 15 }}>
-        <span>交易对数量: {displayedData.length}</span>
+        <span>交易对数量: {displayedData.length}</span> 
         <span style={{ marginLeft: 20 }}>更新时间: {lastUpdated}</span>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}>
-        {Object.keys(scoreRanges).map(range => {
-          if (scoreRanges[range] > 0) {
+        {Object.keys(scoreRanges).map(range => { 
+          if (scoreRanges[range] > 0) { 
             return (
               <div key={range} style={{ marginRight: 20 }}>
                 <span>{`[${range}, ${parseFloat(range) + 0.5}) ${scoreRanges[range]}`}</span>
@@ -235,97 +174,6 @@ const displayedData = [...data]
           return null;
         })}
       </div>
-<div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-  <select
-    value={selectedSymbol}
-    onChange={e => setSelectedSymbol(e.target.value)}
-    style={{
-      padding: '6px 10px',
-      marginRight: 10,
-      fontSize: 14,
-      width: 200
-    }}
-  >
-    <option value="">选择币种</option>
-    {symbols.map(symbol => (
-      <option key={symbol} value={symbol}>
-        {symbol}
-      </option>
-    ))}
-  </select>
-  <input
-    type="number"
-    placeholder="本金"
-    value={n}
-    onChange={e => setN(parseFloat(e.target.value))}
-    style={{
-      padding: '6px 10px',
-      marginRight: 10,
-      fontSize: 14,
-      width: 100
-    }}
-  />
-  <input
-    type="number"
-    placeholder="杠杆"
-    value={k}
-    onChange={e => setK(parseFloat(e.target.value))}
-    style={{
-      padding: '6px 10px',
-      marginRight: 10,
-      fontSize: 14,
-      width: 100
-    }}
-  />
-  <input
-    type="number"
-    placeholder="现货滑点"
-    value={a}
-    onChange={e => setA(parseFloat(e.target.value) / 100)}
-    style={{
-      padding: '6px 10px',
-      marginRight: 10,
-      fontSize: 14,
-      width: 100
-    }}
-  />
-  <input
-    type="number"
-    placeholder="合约滑点"
-    value={b}
-    onChange={e => setB(parseFloat(e.target.value) / 100)}
-    style={{
-      padding: '6px 10px',
-      marginRight: 10,
-      fontSize: 14,
-      width: 100
-    }}
-  />
-  <button
-    onClick={calculateLimits}
-    style={{
-      padding: '6px 12px',
-      cursor: 'pointer',
-      backgroundColor: '#0070f3',
-      color: 'white',
-      border: 'none',
-      borderRadius: 4
-    }}
-  >
-    计算
-  </button>
-</div>
-<div style={{ textAlign: 'center', marginBottom: 15 }}>
-  {maxPosition !== null && (
-    <div>最大仓位: {maxPosition}</div>
-  )}
-  {upperLimit !== null && lowerLimit !== null && (
-    <div>
-      <div>上限价: {upperLimit}</div>
-      <div>下限价: {lowerLimit}</div>
-    </div>
-  )}
-</div>
 
       <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
         <thead style={{ backgroundColor: '#f2f2f2' }}>
@@ -341,18 +189,11 @@ const displayedData = [...data]
         </thead>
         <tbody>
           {displayedData.map(row => (
-            <tr
-              key={row.symbol}
-              style={{
-                backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'),
-                cursor: 'pointer'
-              }}
+            <tr 
+              key={row.symbol} 
+              style={{ backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'), cursor: 'pointer' }}
             >
-              <td
-                style={{
-                  backgroundColor: highlightTokens.includes(row.symbol) ? '#d3f9d8' : 'transparent',
-                }}
-              >
+              <td style={{ backgroundColor: highlightTokens.includes(row.symbol) ? '#d3f9d8' : 'transparent' }}>
                 {row.symbol}
               </td>
               <td>{row.spotPrice}</td>
@@ -366,5 +207,5 @@ const displayedData = [...data]
         </tbody>
       </table>
     </main>
-  );
+  ); 
 }
