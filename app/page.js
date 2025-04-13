@@ -1,4 +1,4 @@
-'use client';
+'use client'; 
 import { useEffect, useState } from 'react';
 
 export default function Home() {
@@ -13,7 +13,7 @@ export default function Home() {
     "DEXE", "DOGE", "DOT", "EGLD", "ELF", "ENJ", "ENS", "ETC", "ETT", "FET", "FIL", "FIS", "FLOW", "FORTH", "GALA", "GRT", "HARD", "HBAR", "IOTA", 
     "IOTX", "JTO", "JUP", "KAVA", "KSM", "LINK", "LPT", "LTC", "LUNA", "MANA", "MASK", "MBOX", "MKR", "NEAR", "NOT", "OM", "ONE", "OP", "PENGU", 
     "PLYTH", "POL", "RSU", "RUNE", "SAND", "SEI", "SHIB", "SKL", "SNX", "SOL", "STX", "SUI", "SUPER", "THETA", "TIA", "TIM", "TKO", "TON", "TRB", 
-    "TROY", "TRX", "TURBO", "UNI", "UTK", "VET", "WIF", "XRP", "XTZ", "YFI", "YGG", "ZEC", "ZIL", "ZRX", "USDT"
+    "TROY", "TRX", "TURBO", "UNI", "UTK", "VET", "WIF", "XRP", "XTZ", "YFI", "YGG", "ZEC", "ZIL", "ZRX"
   ];
 
   // 获取交易对符号
@@ -37,7 +37,7 @@ export default function Home() {
     const newData = await Promise.all(
       symbols.map(async (symbol) => {
         try {
-          const [spotRes, futureRes, premiumRes] = await Promise.all([ 
+          const [spotRes, futureRes, premiumRes] = await Promise.all([
             fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`),
             fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`),
             fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`)
@@ -164,7 +164,7 @@ export default function Home() {
           if (scoreRanges[range] > 0) {
             return (
               <div key={range} style={{ marginRight: 20 }}>
-                <span>{`[${range}, ${parseFloat(range) + 0.5})`: {scoreRanges[range]}</span>
+                <span>{`[${range}, ${parseFloat(range) + 0.5}) ${scoreRanges[range]}`}</span>
               </div>
             );
           }
@@ -195,7 +195,7 @@ export default function Home() {
             >
               <td
                 style={{
-                  backgroundColor: highlightTokens.includes(row.symbol) ? '#d4f8d4' : 'transparent',
+                  backgroundColor: highlightTokens.includes(row.symbol) ? '#ffeb3b' : 'transparent',
                 }}
               >
                 {row.symbol}
