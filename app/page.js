@@ -1,6 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+const highlightSymbols = [
+  '1INCH', 'AAVE', 'ADA', 'ADX', 'AR', 'ATOM', 'AUCTION', 'AVAX', 'BCH', 'BOME', 'BNB', 'CAKE', 'CFX', 'CHZ', 'COMP', 'CRV', 'DASH', 'DEGO', 'DEXE', 'DOGE', 'DOT', 'EGLD', 'ELF', 'ENJ', 'ENS', 'ETC', 'ETT', 'FET', 'FIL', 'FIS', 'FLOW', 'FORTH', 'GALA', 'GRT', 'HARD', 'HBAR', 'IOTA', 'IOTX', 'JTO', 'JUP', 'KAVA', 'KSM', 'LINK', 'LPT', 'LTC', 'LUNA', 'MANA', 'MASK', 'MBOX', 'MKR', 'NEAR', 'NOT', 'OM', 'ONE', 'OP', 'PENGU', 'PLYTH', 'POL', 'RSU', 'RUNE', 'SAND', 'SEI', 'SHIB', 'SKL', 'SNX', 'SOL', 'STX', 'SUI', 'SUPER', 'THETA', 'TIA', 'TIM', 'TKO', 'TON', 'TRB', 'TROY', 'TRX', 'TURBO', 'UNI', 'UTK', 'VET', 'WIF', 'XRP', 'XTZ', 'YFI', 'YGG', 'ZEC', 'ZIL', 'ZRX'
+];
+
 export default function Home() {
   const [data, setData] = useState([]);
   const [symbols, setSymbols] = useState([]);
@@ -28,7 +32,7 @@ export default function Home() {
     const newData = await Promise.all(
       symbols.map(async (symbol) => {
         try {
-          const [spotRes, futureRes, premiumRes] = await Promise.all([
+          const [spotRes, futureRes, premiumRes] = await Promise.all([ 
             fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`),
             fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`),
             fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`)
@@ -58,6 +62,7 @@ export default function Home() {
             lastFundingRate: lastFundingRate.toFixed(4),
             predictedFundingRate: predictedFundingRate.toFixed(4),
             score: score.toFixed(2),
+            isHighlighted: highlightSymbols.includes(symbol) // Add this check to highlight specific symbols
           };
         } catch (e) {
           return null;
@@ -184,21 +189,12 @@ export default function Home() {
                 cursor: 'pointer'
               }}
             >
-              <td>{row.symbol}</td>
+              <td
+                style={{
+                  backgroundColor: row.isHighlighted ? '#ffff99' : 'transparent' // Highlight the symbol if it matches the list
+                }}
+              >
+                {row.symbol}
+              </td>
               <td>{row.spotPrice}</td>
-              <td>{row.futurePrice}</td>
-              <td>{row.basisRate}</td>
-              <td>{row.lastFundingRate}</td>
-              <td>{row.predictedFundingRate}</td>
-              <td>{row.score}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <p style={{ fontSize: 12, marginTop: 10 }}>
-        每60秒自动刷新，按“基差率 - 预期资金费率”排序，高亮显示套利得分大于1的币种，基差得分大于10的异常值标红并放在最后。
-      </p>
-    </main>
-  );
-}
+              <td
