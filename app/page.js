@@ -129,8 +129,8 @@ const calculatePosition = (spotPrice, futurePrice,score) => {
   }
 
   setMaxPosition(maxPosition);
-  setUpperPrice(upperPrice.toFixed(10));
-  setLowerPrice(lowerPrice.toFixed(10));
+  setUpperPrice(upperPrice);
+  setLowerPrice(lowerPrice);
 };
 const handleSymbolInput = () => {
   console.log("Selected Symbol:", selectedSymbol);  // 检查输入的币种符号
@@ -138,7 +138,7 @@ const handleSymbolInput = () => {
   const selectedData = data.find(item => item.symbol === selectedSymbol);
   console.log("Selected Data:", selectedData);  // 检查找到的数据
   if (selectedData) {
-    calculatePosition(parseFloat(selectedData.spotPrice).toFixed(10), parseFloat(selectedData.futurePrice).toFixed(10),parseFloat(selectedData.score));
+    calculatePosition(parseFloat(selectedData.spotPrice), parseFloat(selectedData.futurePrice),parseFloat(selectedData.score));
   } else {
     alert('币种数据未找到');
   }
@@ -247,9 +247,9 @@ return (
     {/* 显示计算结果 */}
     {selectedSymbol && (
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
-        <p>最大仓位: {maxPosition ? maxPosition.toFixed(5) : 'N/A'}</p>
-        <p>上限价: {upperPrice ? upperPrice.toFixed(10) : 'N/A'}</p>
-        <p>下限价: {lowerPrice ? lowerPrice.toFixed(10) : 'N/A'}</p>
+        <p>最大仓位: {maxPosition ? maxPosition.toFixed(2) : 'N/A'}</p>
+        <p>上限价: {upperPrice ? upperPrice.toFixed(6) : 'N/A'}</p>
+        <p>下限价: {lowerPrice ? lowerPrice.toFixed(6) : 'N/A'}</p>
       </div>
     )}
 
