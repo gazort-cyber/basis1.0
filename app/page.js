@@ -8,22 +8,21 @@ export default function Home() {
   const [lastUpdated, setLastUpdated] = useState(null);
 
   // List of tokens to highlight
-  const highlightTokens =[
-  "1INCHUSDT", "AAVEUSDT", "ADAUSDT", "ADXUSDT", "ARUSDT", "ATOMUSDT", "AUCTIONUSDT", 
-  "AVAXUSDT", "BCHUSDT", "BOMEUSDT", "BNBUSDT", "CAKEUSDT", "CFXUSDT", "CHZUSDT", 
-  "COMPUSDT", "CRVUSDT", "DASHUSDT", "DEGOUSDT", "DEXEUSDT", "DOGEUSDT", "DOTUSDT", 
-  "EGLDUSDT", "ELFUSDT", "ENJUSDT", "ENSUSDT", "ETCUSDT", "ETTUSDT", "FETUSDT", "FILUSDT", 
-  "FISUSDT", "FLOWUSDT", "FORTHUSDT", "GALAUSDT", "GRTUSDT", "HARDUSDT", "HBARUSDT", 
-  "IOTAUSDT", "IOTXUSDT", "JTOUSDT", "JUPUSDT", "KAVAUSDT", "KSMUSDT", "LINKUSDT", 
-  "LPTUSDT", "LTCUSDT", "LUNAUSDT", "MANAUSDT", "MASKUSDT", "MBOXUSDT", "MKRUSDT", 
-  "NEARUSDT", "NOTUSDT", "OMUSDT", "ONEUSDT", "OPUSDT", "PENGUUSDT", "PLYTHUSDT", 
-  "POLUSDT", "RSUUSDT", "RUNEUSDT", "SANDUSDT", "SEIUSDT", "SHIBUSDT", "SKLUSDT", 
-  "SNXUSDT", "SOLUSDT", "STXUSDT", "SUIUSDT", "SUPERUSDT", "THETAUSDT", "TIAUSDT", 
-  "TIMUSDT", "TKOUSDT", "TONUSDT", "TRBUSDT", "TROYUSDT", "TRXUSDT", "TURBOUSDT", 
-  "UNIUSDT", "UTKUSDT", "VETUSDT", "WIFUSDT", "XRPUSDT", "XTZUSDT", "YFIUSDT", "YGGUSDT", 
-  "ZECUSDT", "ZILUSDT", "ZRXUSDT"
-];
-
+  const highlightTokens = [
+    "1INCHUSDT", "AAVEUSDT", "ADAUSDT", "ADXUSDT", "ARUSDT", "ATOMUSDT", "AUCTIONUSDT", 
+    "AVAXUSDT", "BCHUSDT", "BOMEUSDT", "BNBUSDT", "CAKEUSDT", "CFXUSDT", "CHZUSDT", 
+    "COMPUSDT", "CRVUSDT", "DASHUSDT", "DEGOUSDT", "DEXEUSDT", "DOGEUSDT", "DOTUSDT", 
+    "EGLDUSDT", "ELFUSDT", "ENJUSDT", "ENSUSDT", "ETCUSDT", "ETTUSDT", "FETUSDT", "FILUSDT", 
+    "FISUSDT", "FLOWUSDT", "FORTHUSDT", "GALAUSDT", "GRTUSDT", "HARDUSDT", "HBARUSDT", 
+    "IOTAUSDT", "IOTXUSDT", "JTOUSDT", "JUPUSDT", "KAVAUSDT", "KSMUSDT", "LINKUSDT", 
+    "LPTUSDT", "LTCUSDT", "LUNAUSDT", "MANAUSDT", "MASKUSDT", "MBOXUSDT", "MKRUSDT", 
+    "NEARUSDT", "NOTUSDT", "OMUSDT", "ONEUSDT", "OPUSDT", "PENGUUSDT", "PLYTHUSDT", 
+    "POLUSDT", "RSUUSDT", "RUNEUSDT", "SANDUSDT", "SEIUSDT", "SHIBUSDT", "SKLUSDT", 
+    "SNXUSDT", "SOLUSDT", "STXUSDT", "SUIUSDT", "SUPERUSDT", "THETAUSDT", "TIAUSDT", 
+    "TIMUSDT", "TKOUSDT", "TONUSDT", "TRBUSDT", "TROYUSDT", "TRXUSDT", "TURBOUSDT", 
+    "UNIUSDT", "UTKUSDT", "VETUSDT", "WIFUSDT", "XRPUSDT", "XTZUSDT", "YFIUSDT", "YGGUSDT", 
+    "ZECUSDT", "ZILUSDT", "ZRXUSDT"
+  ];
 
   // 获取交易对符号
   useEffect(() => {
@@ -95,7 +94,11 @@ export default function Home() {
     // 合并正常数据和异常数据
     const combinedData = [...sortedNormalData, ...abnormalData];
 
-    setData(combinedData);
+    // 将高亮币种的项排到最前面
+    const highlightedData = combinedData.filter(item => highlightTokens.includes(item.symbol));
+    const otherData = combinedData.filter(item => !highlightTokens.includes(item.symbol));
+
+    setData([...highlightedData, ...otherData]);
     setLastUpdated(new Date().toLocaleTimeString());
   };
 
@@ -173,52 +176,4 @@ export default function Home() {
           if (scoreRanges[range] > 0) {
             return (
               <div key={range} style={{ marginRight: 20 }}>
-                <span>{`[${range}, ${parseFloat(range) + 0.5}) ${scoreRanges[range]}`}</span>
-              </div>
-            );
-          }
-          return null;
-        })}
-      </div>
-
-      <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
-        <thead style={{ backgroundColor: '#f2f2f2' }}>
-          <tr>
-            <th>币种</th>
-            <th>现货价</th>
-            <th>合约价</th>
-            <th>基差率%</th>
-            <th>上次资金费率%</th>
-            <th>预期资金费率%</th>
-            <th>套利得分</th>
-          </tr>
-        </thead>
-        <tbody>
-          {displayedData.map(row => (
-            <tr
-              key={row.symbol}
-              style={{
-                backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'),
-                cursor: 'pointer'
-              }}
-            >
-              <td
-                style={{
-                  backgroundColor: highlightTokens.includes(row.symbol) ? '#ffeb3b' : 'transparent',
-                }}
-              >
-                {row.symbol}
-              </td>
-              <td>{row.spotPrice}</td>
-              <td>{row.futurePrice}</td>
-              <td>{row.basisRate}</td>
-              <td>{row.lastFundingRate}</td>
-              <td>{row.predictedFundingRate}</td>
-              <td>{row.score}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </main>
-  );
-}
+                <span>{`[${
