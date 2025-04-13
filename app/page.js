@@ -6,6 +6,16 @@ export default function Home() {
   const [symbols, setSymbols] = useState([]);
   const [search, setSearch] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
+  // 输入参数
+const [n, setN] = useState(1000);  // 本金
+const [k, setK] = useState(3);     // 杠杆
+const [a, setA] = useState(0.06);  // 现货滑点
+const [b, setB] = useState(0.06);  // 合约滑点
+const [selectedSymbol, setSelectedSymbol] = useState('');  // 当前选择的币种
+const [maxPosition, setMaxPosition] = useState(null);  // 最大仓位
+const [upperLimit, setUpperLimit] = useState(null);    // 上限价
+const [lowerLimit, setLowerLimit] = useState(null);    // 下限价
+
 
   // 高亮币种列表
   const highlightTokens =[
@@ -82,6 +92,30 @@ export default function Home() {
         }
       })
     );
+const calculateLimits = () => {
+  if (!selectedSymbol) return;
+
+  const spotPrice = data.find(item => item.symbol === selectedSymbol)?.spotPrice;
+  const futurePrice = data.find(item => item.symbol === selectedSymbol)?.futurePrice;
+
+  if (spotPrice && futurePrice) {
+    // 计算最大仓位
+    const maxPosition = (k * n) / Math.max(spotPrice, futurePrice);
+
+    // 计算上限价和下限价
+    const upperLimit = parseFloat(
+      Math.max(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k))
+    ).toFixed(2);
+
+    const lowerLimit = parseFloat(
+      Math.min(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k))
+    ).toFixed(2);
+
+    setMaxPosition(maxPosition.toFixed(2));
+    setUpperLimit(upperLimit);
+    setLowerLimit(lowerLimit);
+  }
+};
 
     const filteredData = newData.filter(Boolean);
 
@@ -200,6 +234,97 @@ const displayedData = [...data]
           return null;
         })}
       </div>
+<div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+  <select
+    value={selectedSymbol}
+    onChange={e => setSelectedSymbol(e.target.value)}
+    style={{
+      padding: '6px 10px',
+      marginRight: 10,
+      fontSize: 14,
+      width: 200
+    }}
+  >
+    <option value="">选择币种</option>
+    {symbols.map(symbol => (
+      <option key={symbol} value={symbol}>
+        {symbol}
+      </option>
+    ))}
+  </select>
+  <input
+    type="number"
+    placeholder="本金"
+    value={n}
+    onChange={e => setN(parseFloat(e.target.value))}
+    style={{
+      padding: '6px 10px',
+      marginRight: 10,
+      fontSize: 14,
+      width: 100
+    }}
+  />
+  <input
+    type="number"
+    placeholder="杠杆"
+    value={k}
+    onChange={e => setK(parseFloat(e.target.value))}
+    style={{
+      padding: '6px 10px',
+      marginRight: 10,
+      fontSize: 14,
+      width: 100
+    }}
+  />
+  <input
+    type="number"
+    placeholder="现货滑点"
+    value={a}
+    onChange={e => setA(parseFloat(e.target.value) / 100)}
+    style={{
+      padding: '6px 10px',
+      marginRight: 10,
+      fontSize: 14,
+      width: 100
+    }}
+  />
+  <input
+    type="number"
+    placeholder="合约滑点"
+    value={b}
+    onChange={e => setB(parseFloat(e.target.value) / 100)}
+    style={{
+      padding: '6px 10px',
+      marginRight: 10,
+      fontSize: 14,
+      width: 100
+    }}
+  />
+  <button
+    onClick={calculateLimits}
+    style={{
+      padding: '6px 12px',
+      cursor: 'pointer',
+      backgroundColor: '#0070f3',
+      color: 'white',
+      border: 'none',
+      borderRadius: 4
+    }}
+  >
+    计算
+  </button>
+</div>
+<div style={{ textAlign: 'center', marginBottom: 15 }}>
+  {maxPosition !== null && (
+    <div>最大仓位: {maxPosition}</div>
+  )}
+  {upperLimit !== null && lowerLimit !== null && (
+    <div>
+      <div>上限价: {upperLimit}</div>
+      <div>下限价: {lowerLimit}</div>
+    </div>
+  )}
+</div>
 
       <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
         <thead style={{ backgroundColor: '#f2f2f2' }}>
