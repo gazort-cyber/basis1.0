@@ -94,7 +94,11 @@ export default function Home() {
     // 合并正常数据和异常数据
     const combinedData = [...sortedNormalData, ...abnormalData];
 
-    setData(combinedData);
+    // 将高亮币种的项排到最前面
+    const highlightedData = combinedData.filter(item => highlightTokens.includes(item.symbol));
+    const otherData = combinedData.filter(item => !highlightTokens.includes(item.symbol));
+
+    setData([...highlightedData, ...otherData]);
     setLastUpdated(new Date().toLocaleTimeString());
   };
 
@@ -180,5 +184,4 @@ export default function Home() {
         })}
       </div>
 
-      <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
-        <thead style={{ backgroundColor: '#f2f2f2
+      <table border="1
