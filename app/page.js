@@ -1,15 +1,20 @@
 'use client';
 import { useEffect, useState } from 'react';
 
-const highlightSymbols = [
-  '1INCH', 'AAVE', 'ADA', 'ADX', 'AR', 'ATOM', 'AUCTION', 'AVAX', 'BCH', 'BOME', 'BNB', 'CAKE', 'CFX', 'CHZ', 'COMP', 'CRV', 'DASH', 'DEGO', 'DEXE', 'DOGE', 'DOT', 'EGLD', 'ELF', 'ENJ', 'ENS', 'ETC', 'ETT', 'FET', 'FIL', 'FIS', 'FLOW', 'FORTH', 'GALA', 'GRT', 'HARD', 'HBAR', 'IOTA', 'IOTX', 'JTO', 'JUP', 'KAVA', 'KSM', 'LINK', 'LPT', 'LTC', 'LUNA', 'MANA', 'MASK', 'MBOX', 'MKR', 'NEAR', 'NOT', 'OM', 'ONE', 'OP', 'PENGU', 'PLYTH', 'POL', 'RSU', 'RUNE', 'SAND', 'SEI', 'SHIB', 'SKL', 'SNX', 'SOL', 'STX', 'SUI', 'SUPER', 'THETA', 'TIA', 'TIM', 'TKO', 'TON', 'TRB', 'TROY', 'TRX', 'TURBO', 'UNI', 'UTK', 'VET', 'WIF', 'XRP', 'XTZ', 'YFI', 'YGG', 'ZEC', 'ZIL', 'ZRX'
-];
-
 export default function Home() {
   const [data, setData] = useState([]);
   const [symbols, setSymbols] = useState([]);
   const [search, setSearch] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
+
+  // List of tokens to highlight
+  const highlightTokens = [
+    "1INCH", "AAVE", "ADA", "ADX", "AR", "ATOM", "AUCTION", "AVAX", "BCH", "BOME", "BNB", "CAKE", "CFX", "CHZ", "COMP", "CRV", "DASH", "DEGO", 
+    "DEXE", "DOGE", "DOT", "EGLD", "ELF", "ENJ", "ENS", "ETC", "ETT", "FET", "FIL", "FIS", "FLOW", "FORTH", "GALA", "GRT", "HARD", "HBAR", "IOTA", 
+    "IOTX", "JTO", "JUP", "KAVA", "KSM", "LINK", "LPT", "LTC", "LUNA", "MANA", "MASK", "MBOX", "MKR", "NEAR", "NOT", "OM", "ONE", "OP", "PENGU", 
+    "PLYTH", "POL", "RSU", "RUNE", "SAND", "SEI", "SHIB", "SKL", "SNX", "SOL", "STX", "SUI", "SUPER", "THETA", "TIA", "TIM", "TKO", "TON", "TRB", 
+    "TROY", "TRX", "TURBO", "UNI", "UTK", "VET", "WIF", "XRP", "XTZ", "YFI", "YGG", "ZEC", "ZIL", "ZRX"
+  ];
 
   // 获取交易对符号
   useEffect(() => {
@@ -32,7 +37,7 @@ export default function Home() {
     const newData = await Promise.all(
       symbols.map(async (symbol) => {
         try {
-          const [spotRes, futureRes, premiumRes] = await Promise.all([ 
+          const [spotRes, futureRes, premiumRes] = await Promise.all([
             fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`),
             fetch(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`),
             fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`)
@@ -62,7 +67,6 @@ export default function Home() {
             lastFundingRate: lastFundingRate.toFixed(4),
             predictedFundingRate: predictedFundingRate.toFixed(4),
             score: score.toFixed(2),
-            isHighlighted: highlightSymbols.includes(symbol) // Add this check to highlight specific symbols
           };
         } catch (e) {
           return null;
@@ -160,7 +164,7 @@ export default function Home() {
           if (scoreRanges[range] > 0) {
             return (
               <div key={range} style={{ marginRight: 20 }}>
-                <span>{`[${range}, ${parseFloat(range) + 0.5})`}: {scoreRanges[range]}</span>
+                <span>{`[${range}, ${parseFloat(range) + 0.5})`: {scoreRanges[range]}</span>
               </div>
             );
           }
@@ -191,10 +195,14 @@ export default function Home() {
             >
               <td
                 style={{
-                  backgroundColor: row.isHighlighted ? '#ffff99' : 'transparent' // Highlight the symbol if it matches the list
+                  backgroundColor: highlightTokens.includes(row.symbol) ? '#ffeb3b' : 'transparent',
                 }}
               >
                 {row.symbol}
               </td>
               <td>{row.spotPrice}</td>
+              <td>{row.futurePrice}</td>
+              <td>{row.basisRate}</td>
+              <td>{row.lastFundingRate}</td>
+              <td>{row.predictedFundingRate}</td>
               <td
