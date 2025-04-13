@@ -60,8 +60,8 @@ export default function Home() {
             lastFundingRate: lastFundingRate.toFixed(4),
             predictedFundingRate: predictedFundingRate.toFixed(4),
             score: score.toFixed(2),
-            borrowLimit: borrow.borrowLimit.toFixed(2),  // 借贷额度
-            free: borrow.free.toFixed(2)  // 可借余额
+            borrowLimit: borrow?.borrowLimit?.toFixed(2) || 'N/A',  // 如果没有借贷数据，显示 'N/A'
+            free: borrow?.free?.toFixed(2) || 'N/A'  // 如果没有借贷数据，显示 'N/A'
           };
         } catch (e) {
           return null;
