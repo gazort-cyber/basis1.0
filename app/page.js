@@ -110,23 +110,28 @@ export default function Home() {
   }, [symbols]);
 
    // 计算最大仓位、上限价、下限价
-  const calculatePosition = (spotPrice, futurePrice) => {
-    const maxPrice = Math.max(spotPrice, futurePrice);
-    const maxPosition = (k * n) / maxPrice;
+const calculatePosition = (spotPrice, futurePrice) => {
+  if (isNaN(spotPrice) || isNaN(futurePrice)) {
+    alert('价格数据无效');
+    return;
+  }
 
-    let upperPrice, lowerPrice;
-    if (parseFloat(row.score) > 0) { // 如果套利得分为正
-      upperPrice = Math.max(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k));
-      lowerPrice = Math.min(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k));
-    } else { // 如果套利得分为负
-      upperPrice = Math.max(spotPrice * (1 - (1 - a) / k), futurePrice * (1 + (1 - b) / k));
-      lowerPrice = Math.min(spotPrice * (1 - (1 - a) / k), futurePrice * (1 + (1 - b) / k));
-    }
+  const maxPrice = Math.max(spotPrice, futurePrice);
+  const maxPosition = (k * n) / maxPrice;
 
-    setMaxPosition(maxPosition);
-    setUpperPrice(upperPrice);
-    setLowerPrice(lowerPrice);
-  };
+  let upperPrice, lowerPrice;
+  if (parseFloat(selectedData.score) > 0) {  // 使用 selectedData.score 来决定套利得分
+    upperPrice = Math.max(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k));
+    lowerPrice = Math.min(spotPrice * (1 + (1 - a) / k), futurePrice * (1 - (1 - b) / k));
+  } else { 
+    upperPrice = Math.max(spotPrice * (1 - (1 - a) / k), futurePrice * (1 + (1 - b) / k));
+    lowerPrice = Math.min(spotPrice * (1 - (1 - a) / k), futurePrice * (1 + (1 - b) / k));
+  }
+
+  setMaxPosition(maxPosition);
+  setUpperPrice(upperPrice);
+  setLowerPrice(lowerPrice);
+};
 const handleSymbolInput = () => {
   console.log("Selected Symbol:", selectedSymbol);  // 检查输入的币种符号
   console.log("Data Array:", data);  // 检查 data 是否有数据
