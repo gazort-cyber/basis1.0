@@ -138,7 +138,7 @@ const handleSymbolInput = () => {
   const selectedData = data.find(item => item.symbol === selectedSymbol);
   console.log("Selected Data:", selectedData);  // 检查找到的数据
   if (selectedData) {
-    calculatePosition(parseFloat(selectedData.spotPrice), parseFloat(selectedData.futurePrice),parseFloat(selectedData.score));
+    calculatePosition(parseFloat(selectedData.spotPrice).toFixed(10), parseFloat(selectedData.futurePrice).toFixed(10),parseFloat(selectedData.score));
   } else {
     alert('币种数据未找到');
   }
