@@ -156,7 +156,11 @@ const handleSymbolInput = () => {
   }
 };
 
-  
+  // 手动更新数据的函数
+const handleUpdateData = () => {
+  fetchData(); // 调用 fetchData 来重新获取数据
+};
+
   const displayedData = [...data] 
     .sort((a, b) => { 
       // 优先考虑高亮币种 
@@ -201,7 +205,7 @@ return (
   <main style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
     <h1 style={{ marginBottom: 10, textAlign: 'center' }}>币安基差套利工具</h1>
 
-{/* 搜索框 */}
+    {/* 搜索框 */}
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}>
       <input
         type="text"
@@ -212,7 +216,74 @@ return (
       />
     </div>
 
-    {/* 手动输入币种和计算按钮 */}
+    {/* 计算区域 */}
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <div>
+          <label style={{ marginRight: 10 }}>本金 (n):</label>
+          <input
+            type="number"
+            value={n}
+            onChange={(e) => setN(e.target.value)}
+            style={{ padding: '6px', width: '100%' }}
+          />
+        </div>
+        <div>
+          <label style={{ marginRight: 10 }}>杠杆 (k):</label>
+          <input
+            type="number"
+            value={k}
+            onChange={(e) => setK(e.target.value)}
+            style={{ padding: '6px', width: '100%' }}
+          />
+        </div>
+
+        <div>
+          <label style={{ marginRight: 10 }}>现货滑点 (a):</label>
+          <input
+            type="number"
+            step="0.01"
+            value={a}
+            onChange={(e) => setA(e.target.value)}
+            style={{ padding: '6px', width: '100%' }}
+          />
+        </div>
+        <div>
+          <label style={{ marginRight: 10 }}>合约滑点 (b):</label>
+          <input
+            type="number"
+            step="0.01"
+            value={b}
+            onChange={(e) => setB(e.target.value)}
+            style={{ padding: '6px', width: '100%' }}
+          />
+        </div>
+
+        {/* 新增现货价格输入框 */}
+        <div>
+          <label style={{ marginRight: 10 }}>现货价格 (Spot Price):</label>
+          <input
+            type="number"
+            value={manualSpotPrice}
+            onChange={(e) => setManualSpotPrice(e.target.value)}
+            style={{ padding: '6px', width: '100%' }}
+          />
+        </div>
+
+        {/* 新增合约价格输入框 */}
+        <div>
+          <label style={{ marginRight: 10 }}>合约价格 (Future Price):</label>
+          <input
+            type="number"
+            value={manualFuturePrice}
+            onChange={(e) => setManualFuturePrice(e.target.value)}
+            style={{ padding: '6px', width: '100%' }}
+          />
+        </div>
+      </div>
+    </div>
+
+    {/* 币种输入框和计算按钮 */}
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}>
       <input
         type="text"
@@ -229,63 +300,6 @@ return (
       </button>
     </div>
 
- {/* 计算区域 */}
-<div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-  <div>
-    <label style={{ marginRight: 10 }}>本金 (n):</label>
-    <input
-      type="number"
-      value={n}
-      onChange={(e) => setN(e.target.value)}
-      style={{ padding: '6px', marginRight: '10px' }}
-    />
-
-    <label style={{ marginRight: 10 }}>杠杆 (k):</label>
-    <input
-      type="number"
-      value={k}
-      onChange={(e) => setK(e.target.value)}
-      style={{ padding: '6px', marginRight: '10px' }}
-    />
-
-    <label style={{ marginRight: 10 }}>现货滑点 (a):</label>
-    <input
-      type="number"
-      step="0.01"
-      value={a}
-      onChange={(e) => setA(e.target.value)}
-      style={{ padding: '6px', marginRight: '10px' }}
-    />
-
-    <label style={{ marginRight: 10 }}>合约滑点 (b):</label>
-    <input
-      type="number"
-      step="0.01"
-      value={b}
-      onChange={(e) => setB(e.target.value)}
-      style={{ padding: '6px', marginRight: '10px' }}
-    />
-    
-    {/* 新增现货价格输入框 */}
-    <label style={{ marginRight: 10 }}>现货价格 (Spot Price):</label>
-    <input
-      type="number"
-      value={manualSpotPrice}
-      onChange={(e) => setManualSpotPrice(e.target.value)}
-      style={{ padding: '6px', marginRight: '10px' }}
-    />
-
-    {/* 新增合约价格输入框 */}
-    <label style={{ marginRight: 10 }}>合约价格 (Future Price):</label>
-    <input
-      type="number"
-      value={manualFuturePrice}
-      onChange={(e) => setManualFuturePrice(e.target.value)}
-      style={{ padding: '6px', marginRight: '10px' }}
-    />
-  </div>
-</div>
-
     {/* 显示计算结果 */}
     {selectedSymbol && (
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
@@ -299,6 +313,14 @@ return (
     <div style={{ textAlign: 'center', marginBottom: 15 }}>
       <span>交易对数量: {displayedData.length}</span>
       <span style={{ marginLeft: 20 }}>更新时间: {lastUpdated}</span>
+
+      {/* 数据更新按钮 */}
+      <button
+        onClick={handleUpdateData}
+        style={{ padding: '6px 12px', cursor: 'pointer', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: 4, marginLeft: 10 }}
+      >
+        数据更新
+      </button>
     </div>
 
     {/* 交易对数据表格 */}
@@ -330,4 +352,3 @@ return (
     </table>
   </main>
 );
-}
