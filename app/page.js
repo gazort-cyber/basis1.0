@@ -351,4 +351,4 @@ return (
       </tbody>
     </table>
   </main>
-);
+);}
