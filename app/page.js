@@ -18,6 +18,10 @@ export default function Home() {
   const [upperPrice, setUpperPrice] = useState(null);
   const [lowerPrice, setLowerPrice] = useState(null);
 
+  // 新增的现货价格和合约价格
+  const [manualSpotPrice, setManualSpotPrice] = useState('');
+  const [manualFuturePrice, setManualFuturePrice] = useState('');
+  
   // 高亮币种列表
   const highlightTokens = [ 
     "1INCHUSDT", "AAVEUSDT", "ADAUSDT", "ADXUSDT", "ARUSDT", "ATOMUSDT", "AUCTIONUSDT", "AVAXUSDT", "BCHUSDT", 
@@ -109,8 +113,8 @@ export default function Home() {
     return () => clearInterval(interval); 
   }, [symbols]);
 
-   // 计算最大仓位、上限价、下限价
-const calculatePosition = (spotPrice, futurePrice,score) => {
+// 计算最大仓位、上限价、下限价
+const calculatePosition = (spotPrice, futurePrice, score) => {
   if (isNaN(spotPrice) || isNaN(futurePrice)) {
     alert('价格数据无效');
     return;
@@ -132,17 +136,26 @@ const calculatePosition = (spotPrice, futurePrice,score) => {
   setUpperPrice(upperPrice);
   setLowerPrice(lowerPrice);
 };
+
+// 处理币种输入的函数
 const handleSymbolInput = () => {
   console.log("Selected Symbol:", selectedSymbol);  // 检查输入的币种符号
   console.log("Data Array:", data);  // 检查 data 是否有数据
   const selectedData = data.find(item => item.symbol === selectedSymbol);
   console.log("Selected Data:", selectedData);  // 检查找到的数据
+
   if (selectedData) {
-    calculatePosition(parseFloat(selectedData.spotPrice), parseFloat(selectedData.futurePrice),parseFloat(selectedData.score));
+    // 如果手动输入了现货和合约价格，使用这些输入的价格
+    const spotPrice = manualSpotPrice ? parseFloat(manualSpotPrice) : parseFloat(selectedData.spotPrice);
+    const futurePrice = manualFuturePrice ? parseFloat(manualFuturePrice) : parseFloat(selectedData.futurePrice);
+    
+    // 调用计算函数
+    calculatePosition(spotPrice, futurePrice, parseFloat(selectedData.score));
   } else {
     alert('币种数据未找到');
   }
 };
+
   
   const displayedData = [...data] 
     .sort((a, b) => { 
@@ -216,44 +229,62 @@ return (
       </button>
     </div>
 
-    {/* 计算区域 */}
-    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-      <div>
-        <label style={{ marginRight: 10 }}>本金 (n):</label>
-        <input
-          type="number"
-          value={n}
-          onChange={(e) => setN(e.target.value)}
-          style={{ padding: '6px', marginRight: '10px' }}
-        />
+ {/* 计算区域 */}
+<div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+  <div>
+    <label style={{ marginRight: 10 }}>本金 (n):</label>
+    <input
+      type="number"
+      value={n}
+      onChange={(e) => setN(e.target.value)}
+      style={{ padding: '6px', marginRight: '10px' }}
+    />
 
-        <label style={{ marginRight: 10 }}>杠杆 (k):</label>
-        <input
-          type="number"
-          value={k}
-          onChange={(e) => setK(e.target.value)}
-          style={{ padding: '6px', marginRight: '10px' }}
-        />
+    <label style={{ marginRight: 10 }}>杠杆 (k):</label>
+    <input
+      type="number"
+      value={k}
+      onChange={(e) => setK(e.target.value)}
+      style={{ padding: '6px', marginRight: '10px' }}
+    />
 
-        <label style={{ marginRight: 10 }}>现货滑点 (a):</label>
-        <input
-          type="number"
-          step="0.01"
-          value={a}
-          onChange={(e) => setA(e.target.value)}
-          style={{ padding: '6px', marginRight: '10px' }}
-        />
+    <label style={{ marginRight: 10 }}>现货滑点 (a):</label>
+    <input
+      type="number"
+      step="0.01"
+      value={a}
+      onChange={(e) => setA(e.target.value)}
+      style={{ padding: '6px', marginRight: '10px' }}
+    />
 
-        <label style={{ marginRight: 10 }}>合约滑点 (b):</label>
-        <input
-          type="number"
-          step="0.01"
-          value={b}
-          onChange={(e) => setB(e.target.value)}
-          style={{ padding: '6px', marginRight: '10px' }}
-        />
-      </div>
-    </div>
+    <label style={{ marginRight: 10 }}>合约滑点 (b):</label>
+    <input
+      type="number"
+      step="0.01"
+      value={b}
+      onChange={(e) => setB(e.target.value)}
+      style={{ padding: '6px', marginRight: '10px' }}
+    />
+    
+    {/* 新增现货价格输入框 */}
+    <label style={{ marginRight: 10 }}>现货价格 (Spot Price):</label>
+    <input
+      type="number"
+      value={manualSpotPrice}
+      onChange={(e) => setManualSpotPrice(e.target.value)}
+      style={{ padding: '6px', marginRight: '10px' }}
+    />
+
+    {/* 新增合约价格输入框 */}
+    <label style={{ marginRight: 10 }}>合约价格 (Future Price):</label>
+    <input
+      type="number"
+      value={manualFuturePrice}
+      onChange={(e) => setManualFuturePrice(e.target.value)}
+      style={{ padding: '6px', marginRight: '10px' }}
+    />
+  </div>
+</div>
 
     {/* 显示计算结果 */}
     {selectedSymbol && (
