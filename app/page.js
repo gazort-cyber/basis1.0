@@ -51,7 +51,7 @@ export default function Home() {
   const fetchData = async () => { 
     if (symbols.length === 0) return; 
     const currentTime = Date.now(); 
-    const threeDaysAgo = currentTime - 3 * 24 * 60 * 60 * 1000; 
+    const new = currentTime -  12 * 60 * 60 * 1000; 
 
     const newData = await Promise.all( 
       symbols.map(async (symbol) => { 
