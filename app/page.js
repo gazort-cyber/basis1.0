@@ -392,8 +392,6 @@ return (
     {row.predictedFundingRate}
   </td>
 
-  <td>{row.score}</td>
-
   {/* 无风险利率 */}
   <td>{row.score}</td>
 </tr>
