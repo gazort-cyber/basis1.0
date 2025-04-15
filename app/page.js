@@ -360,31 +360,50 @@ return (
       </thead>
       <tbody>
         {highlightedData.map((row) => (
-          <tr
-            key={row.symbol}
-
-            style={{
+        <tr
+  key={row.symbol}
+  style={{
     backgroundColor:
       Math.abs(row.score) > 10
-        ? '#ffcccc'  // 1. 先判断是否得分异常，大于10时背景为红色
+        ? '#ffcccc'  // 1. 得分大于10时，背景为红色
         : Math.abs(row.score) > 1
-        ? '#fff4d6'  // 2. 如果得分大于1但小于等于10，设置为淡黄色
-        : Math.abs(parseFloat(row.predictedFundingRate)) > 1
-        ? '#d6ecff'  // 3. 如果资金费率绝对值大于1，设置为浅蓝色
-        : getEffectiveDigits(row.spotPrice) <= 3
-        ? '#e0e0e0'  // 4. 如果现货价格的有效数字小于等于3，设置为灰色
-        : 'white',  // 5. 其他情况下默认背景为白色
+        ? '#fff4d6'  // 2. 得分大于1且小于等于10时，背景为淡黄色
+        : 'white',  // 3. 默认背景为白色
     cursor: 'pointer',
   }}
-          >
-            {/* 高亮币种背景设为淡绿色 */}
-            <td style={{ backgroundColor: '#d3f9d8' }}>{row.symbol}</td>
-            <td>{row.spotPrice}</td>
-            <td>{row.futurePrice}</td>
-            <td>{row.basisRate}</td>
-            <td>{row.predictedFundingRate}</td>
-            <td>{row.score}</td>
-          </tr>
+>
+  {/* 高亮现货价格单元格，满足有效数字小于等于3时设置为灰色 */}
+  <td
+    style={{
+      backgroundColor: getEffectiveDigits(row.spotPrice) <= 3 ? '#e0e0e0' : 'white',
+    }}
+  >
+    {row.spotPrice}
+  </td>
+
+  {/* 高亮合约价格单元格，满足有效数字小于等于3时设置为灰色 */}
+  <td
+    style={{
+      backgroundColor: getEffectiveDigits(row.futurePrice) <= 3 ? '#e0e0e0' : 'white',
+    }}
+  >
+    {row.futurePrice}
+  </td>
+
+  <td>{row.basisRate}</td>
+
+  {/* 高亮资金费率单元格，满足绝对值大于等于1时设置为浅蓝色 */}
+  <td
+    style={{
+      backgroundColor: Math.abs(parseFloat(row.predictedFundingRate)) >= 1 ? '#d6ecff' : 'white',
+    }}
+  >
+    {row.predictedFundingRate}
+  </td>
+
+  <td>{row.score}</td>
+</tr>
+
         ))}
       </tbody>
     </table>
@@ -406,30 +425,50 @@ return (
       </thead>
       <tbody>
         {nonHighlightedData.map((row) => (
-          <tr
-            key={row.symbol}
-            
-            style={{
+                  <tr
+  key={row.symbol}
+  style={{
     backgroundColor:
       Math.abs(row.score) > 10
-        ? '#ffcccc'  // 1. 先判断是否得分异常，大于10时背景为红色
+        ? '#ffcccc'  // 1. 得分大于10时，背景为红色
         : Math.abs(row.score) > 1
-        ? '#fff4d6'  // 2. 如果得分大于1但小于等于10，设置为淡黄色
-        : Math.abs(parseFloat(row.predictedFundingRate)) > 1
-        ? '#d6ecff'  // 3. 如果资金费率绝对值大于1，设置为浅蓝色
-        : getEffectiveDigits(row.spotPrice) <= 3
-        ? '#e0e0e0'  // 4. 如果现货价格的有效数字小于等于3，设置为灰色
-        : 'white',  // 5. 其他情况下默认背景为白色
+        ? '#fff4d6'  // 2. 得分大于1且小于等于10时，背景为淡黄色
+        : 'white',  // 3. 默认背景为白色
     cursor: 'pointer',
   }}
-          >
-            <td>{row.symbol}</td>
-            <td>{row.spotPrice}</td>
-            <td>{row.futurePrice}</td>
-            <td>{row.basisRate}</td>
-            <td>{row.predictedFundingRate}</td>
-            <td>{row.score}</td>
-          </tr>
+>
+  {/* 高亮现货价格单元格，满足有效数字小于等于3时设置为灰色 */}
+  <td
+    style={{
+      backgroundColor: getEffectiveDigits(row.spotPrice) <= 3 ? '#e0e0e0' : 'white',
+    }}
+  >
+    {row.spotPrice}
+  </td>
+
+  {/* 高亮合约价格单元格，满足有效数字小于等于3时设置为灰色 */}
+  <td
+    style={{
+      backgroundColor: getEffectiveDigits(row.futurePrice) <= 3 ? '#e0e0e0' : 'white',
+    }}
+  >
+    {row.futurePrice}
+  </td>
+
+  <td>{row.basisRate}</td>
+
+  {/* 高亮资金费率单元格，满足绝对值大于等于1时设置为浅蓝色 */}
+  <td
+    style={{
+      backgroundColor: Math.abs(parseFloat(row.predictedFundingRate)) >= 1 ? '#d6ecff' : 'white',
+    }}
+  >
+    {row.predictedFundingRate}
+  </td>
+
+  <td>{row.score}</td>
+</tr>
+
         ))}
       </tbody>
     </table>
