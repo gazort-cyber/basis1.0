@@ -155,6 +155,13 @@ const handleSymbolInput = () => {
     alert('币种数据未找到');
   }
 };
+  //辅助函数来判断有效数字
+const getEffectiveDigits = (price) => {
+  const num = parseFloat(price);
+  if (isNaN(num)) return 0;
+  const str = num.toExponential().replace('.', '').replace(/e[-+]\d+/, '');
+  return str.replace(/^0+/, '').length;
+};
 
   // 手动更新数据的函数
 const handleUpdateData = () => {
@@ -357,16 +364,18 @@ return (
             key={row.symbol}
 
             style={{
-  backgroundColor:
-    Math.abs(row.score) > 10
-      ? '#ffcccc' // 红色，异常值
-      : Math.abs(row.score) > 1
-        ? '#fff4d6' // 黄色，套利得分较高
-        : Math.abs(row.predictedFundingRate) > 1
-          ? '#e0f7ff' // 浅蓝色，资金费率异常
-          : 'white', // 默认白色
-  cursor: 'pointer'
-}}
+    backgroundColor:
+      Math.abs(row.score) > 10
+        ? '#ffcccc'  // 1. 先判断是否得分异常，大于10时背景为红色
+        : Math.abs(row.score) > 1
+        ? '#fff4d6'  // 2. 如果得分大于1但小于等于10，设置为淡黄色
+        : Math.abs(parseFloat(row.predictedFundingRate)) > 1
+        ? '#d6ecff'  // 3. 如果资金费率绝对值大于1，设置为浅蓝色
+        : getEffectiveDigits(row.spotPrice) <= 3
+        ? '#e0e0e0'  // 4. 如果现货价格的有效数字小于等于3，设置为灰色
+        : 'white',  // 5. 其他情况下默认背景为白色
+    cursor: 'pointer',
+  }}
           >
             {/* 高亮币种背景设为淡绿色 */}
             <td style={{ backgroundColor: '#d3f9d8' }}>{row.symbol}</td>
@@ -399,17 +408,20 @@ return (
         {nonHighlightedData.map((row) => (
           <tr
             key={row.symbol}
+            
             style={{
-  backgroundColor:
-    Math.abs(row.score) > 10
-      ? '#ffcccc' // 红色，异常值
-      : Math.abs(row.score) > 1
-        ? '#fff4d6' // 黄色，套利得分较高
-        : Math.abs(row.predictedFundingRate) > 1
-          ? '#e0f7ff' // 浅蓝色，资金费率异常
-          : 'white', // 默认白色
-  cursor: 'pointer'
-}}
+    backgroundColor:
+      Math.abs(row.score) > 10
+        ? '#ffcccc'  // 1. 先判断是否得分异常，大于10时背景为红色
+        : Math.abs(row.score) > 1
+        ? '#fff4d6'  // 2. 如果得分大于1但小于等于10，设置为淡黄色
+        : Math.abs(parseFloat(row.predictedFundingRate)) > 1
+        ? '#d6ecff'  // 3. 如果资金费率绝对值大于1，设置为浅蓝色
+        : getEffectiveDigits(row.spotPrice) <= 3
+        ? '#e0e0e0'  // 4. 如果现货价格的有效数字小于等于3，设置为灰色
+        : 'white',  // 5. 其他情况下默认背景为白色
+    cursor: 'pointer',
+  }}
           >
             <td>{row.symbol}</td>
             <td>{row.spotPrice}</td>
