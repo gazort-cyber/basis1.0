@@ -51,7 +51,7 @@ export default function Home() {
   const fetchData = async () => { 
     if (symbols.length === 0) return; 
     const currentTime = Date.now(); 
-    const new = currentTime -  12 * 60 * 60 * 1000; 
+    const oneHourAgo = currentTime -   60 * 60 * 1000; 
 
     const newData = await Promise.all( 
       symbols.map(async (symbol) => { 
@@ -73,7 +73,7 @@ export default function Home() {
           const score = basisRate - predictedFundingRate; 
 
           // 检查合约是否下架，time 小于12小时之前的时间戳
-          if (premium.time && Number(premium.time) < new) { 
+          if (future.time && Number(future.time) < oneHourAgo) { 
             return null; 
           } 
 
