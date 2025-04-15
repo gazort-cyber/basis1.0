@@ -355,11 +355,18 @@ return (
         {highlightedData.map((row) => (
           <tr
             key={row.symbol}
+
             style={{
-              // 根据套利得分设置行颜色：异常值为红色，较高分为淡黄色，其余为白色
-              backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'),
-              cursor: 'pointer'
-            }}
+  backgroundColor:
+    Math.abs(row.score) > 10
+      ? '#ffcccc' // 红色，异常值
+      : Math.abs(row.score) > 1
+        ? '#fff4d6' // 黄色，套利得分较高
+        : Math.abs(row.predictedFundingRate) > 1
+          ? '#e0f7ff' // 浅蓝色，资金费率异常
+          : 'white', // 默认白色
+  cursor: 'pointer'
+}}
           >
             {/* 高亮币种背景设为淡绿色 */}
             <td style={{ backgroundColor: '#d3f9d8' }}>{row.symbol}</td>
@@ -393,9 +400,16 @@ return (
           <tr
             key={row.symbol}
             style={{
-              backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'),
-              cursor: 'pointer'
-            }}
+  backgroundColor:
+    Math.abs(row.score) > 10
+      ? '#ffcccc' // 红色，异常值
+      : Math.abs(row.score) > 1
+        ? '#fff4d6' // 黄色，套利得分较高
+        : Math.abs(row.predictedFundingRate) > 1
+          ? '#e0f7ff' // 浅蓝色，资金费率异常
+          : 'white', // 默认白色
+  cursor: 'pointer'
+}}
           >
             <td>{row.symbol}</td>
             <td>{row.spotPrice}</td>
