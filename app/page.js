@@ -47,7 +47,7 @@ export default function Home() {
     fetchSymbols(); 
   }, []);
 
-  // 获取合约数据，并过滤3天前的下架合约
+  // 获取合约数据，并过滤12小时前的下架合约
   const fetchData = async () => { 
     if (symbols.length === 0) return; 
     const currentTime = Date.now(); 
@@ -72,8 +72,8 @@ export default function Home() {
           const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100; 
           const score = basisRate - predictedFundingRate; 
 
-          // 检查合约是否下架，time 小于3天之前的时间戳
-          if (premium.time && Number(premium.time) < threeDaysAgo) { 
+          // 检查合约是否下架，time 小于12小时之前的时间戳
+          if (premium.time && Number(premium.time) < new) { 
             return null; 
           } 
 
