@@ -47,7 +47,7 @@ export default function Home() {
     fetchSymbols(); 
   }, []);
 
-  // 获取合约数据，并过滤12小时前的下架合约
+  // 获取合约数据，并过滤1小时前的下架合约
   const fetchData = async () => { 
     if (symbols.length === 0) return; 
     const currentTime = Date.now(); 
@@ -161,24 +161,34 @@ const handleUpdateData = () => {
   fetchData(); // 调用 fetchData 来重新获取数据
 };
 
-  const displayedData = [...data] 
-    .sort((a, b) => { 
-      // 优先考虑高亮币种 
-      const isAHighlighted = highlightTokens.includes(a.symbol); 
-      const isBHighlighted = highlightTokens.includes(b.symbol); 
-      if (isAHighlighted && !isBHighlighted) return -1; // A排在前 
-      if (!isAHighlighted && isBHighlighted) return 1; // B排在前 
+// 对原始数据进行排序和筛选，得到最终用于展示的数据
+const displayedData = [...data]
+  .sort((a, b) => {
+    // 判断 a 和 b 是否为异常值（套利得分的绝对值 > 10）
+    const isAAbnormal = Math.abs(a.score) > 10;
+    const isBAbnormal = Math.abs(b.score) > 10;
 
-      // 处理正常值和异常值 
-      const isAAbnormal = Math.abs(a.score) > 10; 
-      const isBAbnormal = Math.abs(b.score) > 10; 
-      if (isAAbnormal && !isBAbnormal) return 1; // A是异常值，排到后面 
-      if (!isAAbnormal && isBAbnormal) return -1; // B是异常值，排到后面 
+    // 异常值排到正常值后面
+    if (isAAbnormal && !isBAbnormal) return 1;  // a 是异常，排后
+    if (!isAAbnormal && isBAbnormal) return -1; // b 是异常，排后
 
-      // 如果两个币种都不是异常，按得分绝对值排序
-      return Math.abs(b.score) - Math.abs(a.score); 
-    }) 
-    .filter(item => item.symbol.toLowerCase().includes(search.toLowerCase()));
+    // 如果都为正常值或都为异常值，按套利得分的绝对值从高到低排序
+    return Math.abs(b.score) - Math.abs(a.score);
+  })
+  .filter(item =>
+    // 根据用户输入关键词 search 进行币种代码的模糊匹配
+    item.symbol.toLowerCase().includes(search.toLowerCase())
+  );
+
+// 从排序后的数据中筛出高亮币种（一般是你关注的重点币）
+const highlightedData = displayedData.filter(item =>
+  highlightTokens.includes(item.symbol)
+);
+
+// 其余为非高亮币种，单独作为右侧表格显示
+const nonHighlightedData = displayedData.filter(item =>
+  !highlightTokens.includes(item.symbol)
+);
 
   // 计算基差得分区间的交易对数量，范围为0到10
   const calculateScoreRanges = () => { 
@@ -324,6 +334,12 @@ return (
     </div>
 
     {/* 交易对数据表格 */}
+    {/* 页面布局为两个表格并排，用 Flex 布局实现左右结构 */}
+<div style={{ display: 'flex', gap: '20px' }}>
+  
+  {/* 高亮币种表格 */}
+  <div style={{ flex: 1 }}>
+    <h3>可借贷币种</h3>
     <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
       <thead style={{ backgroundColor: '#f2f2f2' }}>
         <tr>
@@ -331,24 +347,67 @@ return (
           <th>现货价</th>
           <th>合约价</th>
           <th>基差率%</th>
-          <th>上次资金费率%</th>
-          <th>预期资金费率%</th>
-          <th>套利得分</th>
+          <th>预期资金费率%</th> {/* 删除了“上次资金费率” */}
+          <th>无风险利率</th>
         </tr>
       </thead>
       <tbody>
-        {displayedData.map((row) => (
-          <tr key={row.symbol} style={{ backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'), cursor: 'pointer' }}>
-            <td style={{ backgroundColor: highlightTokens.includes(row.symbol) ? '#d3f9d8' : 'transparent' }}>{row.symbol}</td>
+        {highlightedData.map((row) => (
+          <tr
+            key={row.symbol}
+            style={{
+              // 根据套利得分设置行颜色：异常值为红色，较高分为淡黄色，其余为白色
+              backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'),
+              cursor: 'pointer'
+            }}
+          >
+            {/* 高亮币种背景设为淡绿色 */}
+            <td style={{ backgroundColor: '#d3f9d8' }}>{row.symbol}</td>
             <td>{row.spotPrice}</td>
             <td>{row.futurePrice}</td>
             <td>{row.basisRate}</td>
-            <td>{row.lastFundingRate}</td>
             <td>{row.predictedFundingRate}</td>
             <td>{row.score}</td>
           </tr>
         ))}
       </tbody>
     </table>
-  </main>
+  </div>
+
+  {/* 非高亮币种表格 */}
+  <div style={{ flex: 1 }}>
+    <h3>其他币种</h3>
+    <table border="1" cellPadding="8" style={{ borderCollapse: 'collapse', width: '100%' }}>
+      <thead style={{ backgroundColor: '#f2f2f2' }}>
+        <tr>
+          <th>币种</th>
+          <th>现货价</th>
+          <th>合约价</th>
+          <th>基差率%</th>
+          <th>预期资金费率%</th> {/* 同样删掉“上次资金费率” */}
+          <th>无风险利率</th>
+        </tr>
+      </thead>
+      <tbody>
+        {nonHighlightedData.map((row) => (
+          <tr
+            key={row.symbol}
+            style={{
+              backgroundColor: Math.abs(row.score) > 10 ? '#ffcccc' : (parseFloat(row.score) > 1 ? '#fff4d6' : 'white'),
+              cursor: 'pointer'
+            }}
+          >
+            <td>{row.symbol}</td>
+            <td>{row.spotPrice}</td>
+            <td>{row.futurePrice}</td>
+            <td>{row.basisRate}</td>
+            <td>{row.predictedFundingRate}</td>
+            <td>{row.score}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+</main>
 );}
