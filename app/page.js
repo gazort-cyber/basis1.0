@@ -9,10 +9,10 @@ export default function Home() {
 
   
   // 新增的参数和计算逻辑
-  const [n, setN] = useState(1000); // 本金默认1000
-  const [k, setK] = useState(3); // 杠杆默认3
-  const [a, setA] = useState(0.06); // 现货滑点默认6%
-  const [b, setB] = useState(0.06); // 合约滑点默认6%
+  const [n, setN] = useState(330); // 本金默认330
+  const [k, setK] = useState(5); // 杠杆默认5
+  const [a, setA] = useState(0.13); // 现货滑点默认13%
+  const [b, setB] = useState(0.18); // 合约滑点默认18%
   const [selectedSymbol, setSelectedSymbol] = useState('');
   const [maxPosition, setMaxPosition] = useState(null);
   const [upperPrice, setUpperPrice] = useState(null);
