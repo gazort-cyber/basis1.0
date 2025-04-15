@@ -360,49 +360,44 @@ return (
       </thead>
       <tbody>
         {highlightedData.map((row) => (
-        <tr
+       <tr
   key={row.symbol}
   style={{
     backgroundColor:
       Math.abs(row.score) > 10
-        ? '#ffcccc'  // 1. 得分大于10时，背景为红色
+        ? '#ffcccc'
         : Math.abs(row.score) > 1
-        ? '#fff4d6'  // 2. 得分大于1且小于等于10时，背景为淡黄色
-        : 'white',  // 3. 默认背景为白色
+        ? '#fff4d6'
+        : 'white',
     cursor: 'pointer',
   }}
 >
-  {/* 高亮现货价格单元格，满足有效数字小于等于3时设置为灰色 */}
-  <td
-    style={{
-      backgroundColor: getEffectiveDigits(row.spotPrice) <= 3 ? '#e0e0e0' : 'white',
-    }}
-  >
+  {/* 币种名单元格：如果是高亮币种，加淡绿色背景 */}
+  <td style={{ backgroundColor: '#d3f9d8' }}>{row.symbol}</td>
+
+  {/* 现货价格：有效数字 ≤ 3 显示灰色 */}
+  <td style={{ backgroundColor: getEffectiveDigits(row.spotPrice) <= 3 ? '#e0e0e0' : 'white' }}>
     {row.spotPrice}
   </td>
 
-  {/* 高亮合约价格单元格，满足有效数字小于等于3时设置为灰色 */}
-  <td
-    style={{
-      backgroundColor: getEffectiveDigits(row.futurePrice) <= 3 ? '#e0e0e0' : 'white',
-    }}
-  >
+  {/* 合约价格：有效数字 ≤ 3 显示灰色 */}
+  <td style={{ backgroundColor: getEffectiveDigits(row.futurePrice) <= 3 ? '#e0e0e0' : 'white' }}>
     {row.futurePrice}
   </td>
 
   <td>{row.basisRate}</td>
 
-  {/* 高亮资金费率单元格，满足绝对值大于等于1时设置为浅蓝色 */}
-  <td
-    style={{
-      backgroundColor: Math.abs(parseFloat(row.predictedFundingRate)) >= 1 ? '#d6ecff' : 'white',
-    }}
-  >
+  {/* 资金费率绝对值 ≥ 1 显示浅蓝色 */}
+  <td style={{ backgroundColor: Math.abs(parseFloat(row.predictedFundingRate)) >= 1 ? '#d6ecff' : 'white' }}>
     {row.predictedFundingRate}
   </td>
 
   <td>{row.score}</td>
+
+  {/* 无风险利率 */}
+  <td>{row.score}</td>
 </tr>
+
 
         ))}
       </tbody>
@@ -430,14 +425,17 @@ return (
   style={{
     backgroundColor:
       Math.abs(row.score) > 10
-        ? '#ffcccc'  // 1. 得分大于10时，背景为红色
+        ? '#ffcccc'
         : Math.abs(row.score) > 1
-        ? '#fff4d6'  // 2. 得分大于1且小于等于10时，背景为淡黄色
-        : 'white',  // 3. 默认背景为白色
+        ? '#fff4d6'
+        : 'white',
     cursor: 'pointer',
   }}
 >
-  {/* 高亮现货价格单元格，满足有效数字小于等于3时设置为灰色 */}
+  {/* 币种 */}
+  <td>{row.symbol}</td>
+
+  {/* 现货价格：有效数字 ≤ 3 显示灰色 */}
   <td
     style={{
       backgroundColor: getEffectiveDigits(row.spotPrice) <= 3 ? '#e0e0e0' : 'white',
@@ -446,7 +444,7 @@ return (
     {row.spotPrice}
   </td>
 
-  {/* 高亮合约价格单元格，满足有效数字小于等于3时设置为灰色 */}
+  {/* 合约价格：有效数字 ≤ 3 显示灰色 */}
   <td
     style={{
       backgroundColor: getEffectiveDigits(row.futurePrice) <= 3 ? '#e0e0e0' : 'white',
@@ -457,7 +455,7 @@ return (
 
   <td>{row.basisRate}</td>
 
-  {/* 高亮资金费率单元格，满足绝对值大于等于1时设置为浅蓝色 */}
+  {/* 资金费率 ≥ 1 标蓝色 */}
   <td
     style={{
       backgroundColor: Math.abs(parseFloat(row.predictedFundingRate)) >= 1 ? '#d6ecff' : 'white',
@@ -466,8 +464,10 @@ return (
     {row.predictedFundingRate}
   </td>
 
+  {/* 无风险利率 */}
   <td>{row.score}</td>
 </tr>
+
 
         ))}
       </tbody>
