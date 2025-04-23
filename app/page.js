@@ -72,15 +72,20 @@ export default function Home() {
           const basisRate = ((spotPrice - futurePrice) / futurePrice) * 100; 
           const lastFundingRate = parseFloat(premium.lastFundingRate || 0) * 100; 
           const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100; 
+          const leverage = Number(k);
+          const periodNum = Number(period);
+
          // 参考值
           const spotFeeRate = 0.0004;    // 现货手续费
           const futureFeeRate = 0.0008;  // 合约手续费
           const borrowRate = 0.01;       // 借贷利率
 
           // 计算交易成本
-          const tradingCost = (spotFeeRate + futureFeeRate) * k + borrowRate * k * period / 2
-          const rawScore = (basisRate - predictedFundingRate) * k / 2 - tradingCost;
-          const score = rawScore.toFixed(2);
+          const tradingCost =(spotFeeRate + futureFeeRate) * leverage + borrowRate * leverage * periodNum / 2;
+          const rawScore = (basisRate - predictedFundingRate) * leverage / 2 - tradingCost;
+          // 只 toFixed 一次
+          const score = rawScore.toFixed(4);
+
 
 
           // 检查合约是否下架，time 小于12小时之前的时间戳
@@ -309,7 +314,7 @@ return (
           />
         </div>
             <div>
-              <label style={{ marginRight: 10 }}>交易周期 (days):</label>
+              <label style={{ marginRight: 10 }}>交易周期 (Hours):</label>
               <input
                 type="number"
                 value={period}
