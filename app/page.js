@@ -78,13 +78,20 @@ export default function Home() {
          // 参考值
           const spotFeeRate = 0.08;    // 现货手续费
           const futureFeeRate = 0.1;  // 合约手续费
-          const borrowRate = 0.1;       // 借贷利率
+          const borrowRate = 0.01;       // 借贷利率
           const constantBasis=0.2;     // 常驻基差
 
           // 计算交易成本
           const tradingCost =(spotFeeRate + futureFeeRate) * leverage + borrowRate * leverage * periodNum / 2;
           const adjustedBasis = Math.abs(constantBasis) > Math.abs(basisRate)? basisRate : basisRate - Math.sign(basisRate) * constantBasis;
-          const rawScore = (adjustedBasis - predictedFundingRate) * leverage / 2 - tradingCost;
+          // 先算出放大后的收益
+          const grossProfit = (adjustedBasis - predictedFundingRate) * leverage / 2;
+            
+            // 根据绝对值与成本比较，决定是否扣除交易成本
+            const rawScore = Math.abs(grossProfit) > tradingCost
+              ? grossProfit - tradingCost
+              : grossProfit;
+
           // 只 toFixed 一次
           const score = rawScore.toFixed(4);
 
