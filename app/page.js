@@ -6,6 +6,8 @@ export default function Home() {
   const [symbols, setSymbols] = useState([]); 
   const [search, setSearch] = useState(''); 
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [period, setPeriod] = useState(8); // 交易周期，默认 8
+
 
   
   // 新增的参数和计算逻辑
@@ -70,7 +72,16 @@ export default function Home() {
           const basisRate = ((spotPrice - futurePrice) / futurePrice) * 100; 
           const lastFundingRate = parseFloat(premium.lastFundingRate || 0) * 100; 
           const predictedFundingRate = parseFloat(premium.lastFundingRate || 0) * 100; 
-          const score = basisRate - predictedFundingRate; 
+         // 参考值
+          const spotFeeRate = 0.0004;    // 现货手续费
+          const futureFeeRate = 0.0008;  // 合约手续费
+          const borrowRate = 0.01;       // 借贷利率
+
+          // 计算交易成本
+          const tradingCost = (spotFeeRate + futureFeeRate) * k + borrowRate * k * period / 2
+          const rawScore = (basisRate - predictedFundingRate) * k / 2 - tradingCost;
+          const score = rawScore.toFixed(2);
+
 
           // 检查合约是否下架，time 小于12小时之前的时间戳
           if (future.time && Number(future.time) < oneHourAgo) { 
@@ -297,8 +308,18 @@ return (
             style={{ padding: '6px', width: '100%' }}
           />
         </div>
+            <div>
+  <label style={{ marginRight: 10 }}>交易周期 (days):</label>
+  <input
+    type="number"
+    value={period}
+    onChange={e => setPeriod(e.target.value)}
+    style={{ padding: '6px', width: '100%' }}
+  />
+</div>
       </div>
     </div>
+
 
     {/* 币种输入框和计算按钮 */}
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 15 }}>
