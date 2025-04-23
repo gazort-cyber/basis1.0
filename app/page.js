@@ -79,7 +79,7 @@ export default function Home() {
           const spotFeeRate = 0.08;    // 现货手续费
           const futureFeeRate = 0.1;  // 合约手续费
           const borrowRate = 0.01;       // 借贷利率
-          const constantBasis=0.2;     // 常驻基差
+          const constantBasis=0.1;     // 常驻基差
 
           // 计算交易成本
           const tradingCost =(spotFeeRate + futureFeeRate) * leverage + borrowRate * leverage * periodNum / 2;
@@ -119,9 +119,9 @@ export default function Home() {
 
     const filteredData = newData.filter(Boolean);
 
-    // 将得分绝对值大于50的项提取出来放到最后面
-    const normalData = filteredData.filter(item => Math.abs(parseFloat(item.score)) <= 50);
-    const abnormalData = filteredData.filter(item => Math.abs(parseFloat(item.score)) >50);
+    // 将得分绝对值大于30的项提取出来放到最后面
+    const normalData = filteredData.filter(item => Math.abs(parseFloat(item.score)) <= 30);
+    const abnormalData = filteredData.filter(item => Math.abs(parseFloat(item.score)) >30);
 
     // 将正常数据按套利得分的绝对值从高到低排序，异常数据放到最后
     const sortedNormalData = normalData.sort((a, b) => Math.abs(b.score) - Math.abs(a.score));
@@ -212,9 +212,9 @@ const handleUpdateData = async () => {
 // 对原始数据进行排序和筛选，得到最终用于展示的数据
 const displayedData = [...data]
   .sort((a, b) => {
-    // 判断 a 和 b 是否为异常值（套利得分的绝对值 > 50）
-    const isAAbnormal = Math.abs(a.score) > 50;
-    const isBAbnormal = Math.abs(b.score) > 50;
+    // 判断 a 和 b 是否为异常值（套利得分的绝对值 > 30）
+    const isAAbnormal = Math.abs(a.score) > 30;
+    const isBAbnormal = Math.abs(b.score) > 30;
 
     // 异常值排到正常值后面
     if (isAAbnormal && !isBAbnormal) return 1;  // a 是异常，排后
@@ -415,7 +415,7 @@ return (
   key={row.symbol}
   style={{
     backgroundColor:
-      Math.abs(row.score) > 10
+      Math.abs(row.score) > 30
         ? '#ffcccc'
         : Math.abs(row.score) > 1.5
         ? '#fff4d6'
@@ -473,7 +473,7 @@ return (
   key={row.symbol}
   style={{
     backgroundColor:
-      Math.abs(row.score) > 10
+      Math.abs(row.score) > 30
         ? '#ffcccc'
         : Math.abs(row.score) > 1
         ? '#fff4d6'
