@@ -79,7 +79,7 @@ export default function Home() {
           const spotFeeRate = 0.08;    // 现货手续费
           const futureFeeRate = 0.1;  // 合约手续费
           const borrowRate = 0.1;       // 借贷利率
-          const constantbasis=0.2;     // 常驻基差
+          const constantBasis=0.2;     // 常驻基差
 
           // 计算交易成本
           const tradingCost =(spotFeeRate + futureFeeRate) * leverage + borrowRate * leverage * periodNum / 2;
