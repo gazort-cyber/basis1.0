@@ -83,7 +83,8 @@ export default function Home() {
 
           // 计算交易成本
           const tradingCost =(spotFeeRate + futureFeeRate) * leverage + borrowRate * leverage * periodNum / 2;
-          const rawScore = (basisRate - predictedFundingRate-constantbasis) * leverage / 2 - tradingCost;
+          const adjustedBasis = Math.abs(constantBasis) > Math.abs(basisRate)? basisRate : basisRate - Math.sign(basisRate) * constantBasis;
+          const rawScore = (adjustedBasis - predictedFundingRate) * leverage / 2 - tradingCost;
           // 只 toFixed 一次
           const score = rawScore.toFixed(4);
 
