@@ -95,7 +95,7 @@ export default function Home() {
             basisRate: basisRate.toFixed(2), 
             lastFundingRate: lastFundingRate.toFixed(4), 
             predictedFundingRate: predictedFundingRate.toFixed(4), 
-            score: score.toFixed(2), 
+            score: score.toFixed(4), 
           }; 
         } catch (e) { 
           return null; 
@@ -309,14 +309,14 @@ return (
           />
         </div>
             <div>
-  <label style={{ marginRight: 10 }}>交易周期 (days):</label>
-  <input
-    type="number"
-    value={period}
-    onChange={e => setPeriod(e.target.value)}
-    style={{ padding: '6px', width: '100%' }}
-  />
-</div>
+              <label style={{ marginRight: 10 }}>交易周期 (days):</label>
+              <input
+                type="number"
+                value={period}
+                onChange={e => setPeriod(e.target.value)}
+                style={{ padding: '6px', width: '100%' }}
+            />
+          </div>
       </div>
     </div>
 
