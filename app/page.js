@@ -100,7 +100,7 @@ export default function Home() {
             basisRate: basisRate.toFixed(2), 
             lastFundingRate: lastFundingRate.toFixed(4), 
             predictedFundingRate: predictedFundingRate.toFixed(4), 
-            score: score.toFixed(4), 
+            score, 
           }; 
         } catch (e) { 
           return null; 
