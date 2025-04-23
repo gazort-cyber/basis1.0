@@ -417,7 +417,7 @@ return (
     backgroundColor:
       Math.abs(row.score) > 30
         ? '#ffcccc'
-        : Math.abs(row.score) > 1.5
+        : Math.abs(row.score) > 1
         ? '#fff4d6'
         : 'white',
     cursor: 'pointer',
