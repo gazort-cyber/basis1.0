@@ -9,10 +9,10 @@ export default function Home() {
 
   
   // 新增的参数和计算逻辑
-  const [n, setN] = useState(330); // 本金默认330
+  const [n, setN] = useState(300); // 本金默认300
   const [k, setK] = useState(5); // 杠杆默认5
-  const [a, setA] = useState(0.13); // 现货滑点默认13%
-  const [b, setB] = useState(0.18); // 合约滑点默认18%
+  const [a, setA] = useState(0.4); // 现货滑点默认40%
+  const [b, setB] = useState(0.08); // 合约滑点默认8%
   const [selectedSymbol, setSelectedSymbol] = useState('');
   const [maxPosition, setMaxPosition] = useState(null);
   const [upperPrice, setUpperPrice] = useState(null);
@@ -171,9 +171,9 @@ const handleUpdateData = () => {
 // 对原始数据进行排序和筛选，得到最终用于展示的数据
 const displayedData = [...data]
   .sort((a, b) => {
-    // 判断 a 和 b 是否为异常值（套利得分的绝对值 > 10）
-    const isAAbnormal = Math.abs(a.score) > 10;
-    const isBAbnormal = Math.abs(b.score) > 10;
+    // 判断 a 和 b 是否为异常值（套利得分的绝对值 > 30）
+    const isAAbnormal = Math.abs(a.score) > 30;
+    const isBAbnormal = Math.abs(b.score) > 30;
 
     // 异常值排到正常值后面
     if (isAAbnormal && !isBAbnormal) return 1;  // a 是异常，排后
