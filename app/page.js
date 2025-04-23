@@ -153,24 +153,33 @@ const calculatePosition = (spotPrice, futurePrice, score) => {
   setLowerPrice(lowerPrice);
 };
 
-// 处理币种输入的函数
 const handleSymbolInput = () => {
-  console.log("Selected Symbol:", selectedSymbol);  // 检查输入的币种符号
-  console.log("Data Array:", data);  // 检查 data 是否有数据
-  const selectedData = data.find(item => item.symbol === selectedSymbol);
-  console.log("Selected Data:", selectedData);  // 检查找到的数据
+  // 1. 补全 USDT 后缀
+  const symbolInput = selectedSymbol.toUpperCase();
+  const fullSymbol = symbolInput.endsWith('USDT') ? symbolInput : symbolInput + 'USDT';
+
+  console.log("Full Symbol:", fullSymbol);
+  console.log("Data Array:", data);
+
+  // 2. 用补全后的符号去 data 里找
+  const selectedData = data.find(item => item.symbol === fullSymbol);
+  console.log("Selected Data:", selectedData);
 
   if (selectedData) {
-    // 如果手动输入了现货和合约价格，使用这些输入的价格
-    const spotPrice = manualSpotPrice ? parseFloat(manualSpotPrice) : parseFloat(selectedData.spotPrice);
-    const futurePrice = manualFuturePrice ? parseFloat(manualFuturePrice) : parseFloat(selectedData.futurePrice);
-    
-    // 调用计算函数
+    const spotPrice = manualSpotPrice
+      ? parseFloat(manualSpotPrice)
+      : parseFloat(selectedData.spotPrice);
+    const futurePrice = manualFuturePrice
+      ? parseFloat(manualFuturePrice)
+      : parseFloat(selectedData.futurePrice);
+
+    // 3. 调用计算仓位的函数
     calculatePosition(spotPrice, futurePrice, parseFloat(selectedData.score));
   } else {
-    alert('币种数据未找到');
+    alert(`币种 ${fullSymbol} 数据未找到`);
   }
 };
+
   //辅助函数来判断有效数字
 const getEffectiveDigits = (price) => {
   const num = parseFloat(price);
@@ -179,10 +188,17 @@ const getEffectiveDigits = (price) => {
   return str.replace(/^0+/, '').length;
 };
 
-  // 手动更新数据的函数
-const handleUpdateData = () => {
-  fetchData(); // 调用 fetchData 来重新获取数据
+// 手动更新数据的函数，等 fetchData 完成后再提示
+const handleUpdateData = async () => {
+  try {
+    await fetchData();           // 等待数据更新完成
+    alert('数据更新成功');       // 更新成功提示
+  } catch (err) {
+    console.error(err);
+    alert('数据更新失败，请重试');
+  }
 };
+
 
 // 对原始数据进行排序和筛选，得到最终用于展示的数据
 const displayedData = [...data]
