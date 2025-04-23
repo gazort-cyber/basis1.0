@@ -9,14 +9,15 @@ export default function CustomRealtime() {
   const spotPrices = useRef({});
   const wsRefs = useRef({ spot: null, contract: null });
 
-  const [n, setN] = useState(300); // 本金默认300
-  const [k, setK] = useState(5); // 杠杆默认5
-  const [a, setA] = useState(0.4); // 现货滑点默认40%
-  const [b, setB] = useState(0.08); // 合约滑点默认8%
-  const [spotFeeRate, setSpotFeeRate] = useState(0.08);  // 现货手续费默认8%
-  const [futureFeeRate, setFutureFeeRate] = useState(0.1); // 合约手续费默认10%
-  const [borrowRate, setBorrowRate] = useState(0.01);     // 借贷利率默认1%
-  const [constantBasis, setConstantBasis] = useState(0.1); // 常驻基差默认0.1%
+  // 参数管理
+  const [n, setN] = useState(300); // 本金
+  const [k, setK] = useState(5); // 杠杆
+  const [a, setA] = useState(0.4); // 现货滑点
+  const [b, setB] = useState(0.08); // 合约滑点
+  const [spotFeeRate, setSpotFeeRate] = useState(0.08);  // 现货手续费
+  const [futureFeeRate, setFutureFeeRate] = useState(0.1); // 合约手续费
+  const [borrowRate, setBorrowRate] = useState(0.01);     // 借贷利率
+  const [constantBasis, setConstantBasis] = useState(0.1); // 常驻基差
   const [selectedSymbol, setSelectedSymbol] = useState('btc'); // 默认选择BTC
   const [symbols, setSymbols] = useState(["btcusdt", "ethusdt"]); // 动态的符号列表
   const [maxPosition, setMaxPosition] = useState(null);
@@ -129,15 +130,127 @@ export default function CustomRealtime() {
 
   return (
     <div className="container" style={{ textAlign: 'center' }}>
-      <input
-        type="text"
-        value={selectedSymbol}
-        onChange={(e) => setSelectedSymbol(e.target.value)}
-        placeholder="请输入币种（例如 BTC,ETH）"
-        style={{ marginBottom: '20px' }}
-      />
-      <button onClick={handleSymbolInput} style={{ marginBottom: '20px' }}>查询</button>
-      <table style={{ margin: '0 auto' }}>
+      {/* 输入框部分 */}
+      <div style={{ marginBottom: '20px' }}>
+        <label>
+          选择币种:
+          <input
+            type="text"
+            value={selectedSymbol}
+            onChange={(e) => setSelectedSymbol(e.target.value)}
+            placeholder="请输入币种（例如 BTC,ETH）"
+          />
+          <button onClick={handleSymbolInput} style={{ marginLeft: '10px' }}>查询</button>
+        </label>
+      </div>
+
+      {/* 用户自定义参数输入框 */}
+      <div style={{ marginBottom: '10px' }}>
+        <label>
+          本金 (n):
+          <input
+            type="number"
+            value={n}
+            onChange={(e) => setN(Number(e.target.value))}
+            min="0"
+          />
+        </label>
+      </div>
+
+      <div style={{ marginBottom: '10px' }}>
+        <label>
+          杠杆 (k):
+          <input
+            type="number"
+            value={k}
+            onChange={(e) => setK(Number(e.target.value))}
+            min="1"
+          />
+        </label>
+      </div>
+
+      <div style={{ marginBottom: '10px' }}>
+        <label>
+          现货滑点 (a):
+          <input
+            type="number"
+            value={a}
+            onChange={(e) => setA(Number(e.target.value))}
+            step="0.01"
+            min="0"
+            max="1"
+          />
+        </label>
+      </div>
+
+      <div style={{ marginBottom: '10px' }}>
+        <label>
+          合约滑点 (b):
+          <input
+            type="number"
+            value={b}
+            onChange={(e) => setB(Number(e.target.value))}
+            step="0.01"
+            min="0"
+            max="1"
+          />
+        </label>
+      </div>
+
+      <div style={{ marginBottom: '10px' }}>
+        <label>
+          现货手续费:
+          <input
+            type="number"
+            value={spotFeeRate}
+            onChange={(e) => setSpotFeeRate(Number(e.target.value))}
+            step="0.01"
+            min="0"
+          />
+        </label>
+      </div>
+
+      <div style={{ marginBottom: '10px' }}>
+        <label>
+          合约手续费:
+          <input
+            type="number"
+            value={futureFeeRate}
+            onChange={(e) => setFutureFeeRate(Number(e.target.value))}
+            step="0.01"
+            min="0"
+          />
+        </label>
+      </div>
+
+      <div style={{ marginBottom: '10px' }}>
+        <label>
+          借贷利率:
+          <input
+            type="number"
+            value={borrowRate}
+            onChange={(e) => setBorrowRate(Number(e.target.value))}
+            step="0.01"
+            min="0"
+          />
+        </label>
+      </div>
+
+      <div style={{ marginBottom: '10px' }}>
+        <label>
+          常驻基差:
+          <input
+            type="number"
+            value={constantBasis}
+            onChange={(e) => setConstantBasis(Number(e.target.value))}
+            step="0.01"
+            min="0"
+          />
+        </label>
+      </div>
+
+      {/* 显示结果的表格 */}
+      <table style={{ margin: '20px auto', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
             <th>时间</th>
